@@ -1,0 +1,231 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/*Fin del reset*/
+html {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: #42558C;
+}
+
+h3 {
+  color: white;
+}
+
+.container_menu {
+  width: 100%;
+  margin-left: 50px;
+}
+
+.menu {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  max-width: 270px;
+  background-color: #D0DCF2;
+  position: relative;
+  border-radius: 10px;
+}
+.menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  min-width: 90px;
+  cursor: pointer;
+}
+.menu__item:hover .menu__vertical-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 10px;
+  position: absolute;
+  top: 40px;
+}
+.menu__vertical-menu {
+  display: none;
+  background-color: #F2C185;
+  height: 100px;
+  min-width: 90px;
+  text-align: justify;
+}
+.menu__vertical-menu:hover {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 10px;
+  position: absolute;
+  top: 40px;
+}
+
+.carne {
+  justify-self: flex-end;
+}
+
+header {
+  height: 10vh;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+}
+
+.form {
+  width: 100%;
+}
+
+.text_area {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.text_input {
+  width: 45%;
+  height: 70vh;
+  resize: none;
+}
+
+.button_area {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 3%;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.button {
+  width: 300px;
+  height: 10vh;
+}
