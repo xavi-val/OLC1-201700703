@@ -38,7 +38,7 @@ function download(name) {
 /*AJAX METHODS*/
 
 async function go() {
-  let res = await fetch("http://localhost:8080/go", {
+  let res = await fetch("http://192.168.1.8:8080/go", {
     method: "POST",
     body: text_area1.value,
   });
@@ -47,7 +47,7 @@ async function go() {
 }
 
 async function Python() {
-  let res = await fetch("http://localhost:8080/python", {
+  let res = await fetch("http://192.168.1.8:8080/python", {
     method: "POST",
     body: text_area1.value,
   });
