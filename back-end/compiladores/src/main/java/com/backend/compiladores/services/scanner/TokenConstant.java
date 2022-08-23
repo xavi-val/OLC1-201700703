@@ -1,0 +1,81 @@
+package com.backend.compiladores.services.scanner;
+
+public enum TokenConstant {
+    COMMENT,
+
+    //TIPOS DE DATOS
+    NUMERO,
+    STRING,
+    BOOLEAN,
+    CHARACTER,
+
+    //SIMBOLOS MATEMATICOS
+    SUMA,
+    RESTA,
+    MULTIPLICACION,
+    DIVISION,
+    EQUAL,
+
+    //EXPRESIONES ARITMETICAS
+    EXPRESION,
+
+    //SIBOLOS DE UN SOLO CARACTER - INICIO
+    ASIGNACION,
+    COMA,
+    END_INSTRUCTION,
+    PARA,
+    PARC,
+    QUEA,
+    QUEC,
+
+    //PALABRAS RESERVADAS - TIPADO
+
+    TIPADO_NUMERO,
+    TIPADO_CADENA,
+    TIPADO_BOOLEAN,
+    TIPADO_CARACTER,
+
+    //PALABRAS RESERVADAS
+    POTENCIA,
+    MODULO,
+    INICIO,
+    FIN,
+    INGRESAR,
+    COMO,
+    CON_VALOR,
+    IF,
+    ELSE,
+    ELSE_IF,
+    THEN,  //REPETIDO EN IF, SELECT CASE
+    END_IF,
+    SELECT,
+    CASE,  //REPETIDO EN FOR , SELECT CASE, MIENTRAS
+    DEFAULT,
+    END_SELECT,
+    FOR,
+    TO,
+    END_FOR,
+    INCREMENTAL,
+    WHILE,
+    END_WHILE,
+    REPETIR,
+    HASTA_QUE,
+    RETURN,
+    METODO,
+    FIN_METODO,
+    CON_PARAMETROS,
+    FUNCTION,
+    END_FUNCTION,
+    EJECUTAR,
+    IMPRIMIR,
+    IMPRIMIR_SIN_SALTO,
+
+
+    //VARIABLES
+    VARIABLE,
+
+    //ERRORES Y END OF FILE
+    ERROR,
+    EOF
+
+    }
