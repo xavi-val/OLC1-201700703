@@ -1,10 +1,7 @@
 package com.backend.compiladores;
 
-import com.backend.compiladores.services.scanner.Lexer;
-import com.backend.compiladores.services.scanner.Token;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -47,14 +44,11 @@ public class LexerTest {
                 """ ;
         Reader stringReader = new StringReader(testString);
         Lexer lexerHandler = new Lexer(stringReader);
-        try {
-            while (!lexerHandler.yyatEOF()){
-                Token token = lexerHandler.yylex();
-                System.out.println(token);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        while (!lexerHandler.yyatEOF()) {
+            System.out.println(lexerHandler.yytext());
         }
+
     }
 
 }

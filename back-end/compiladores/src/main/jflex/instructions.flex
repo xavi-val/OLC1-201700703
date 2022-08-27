@@ -1,11 +1,11 @@
-package com.backend.compiladores.services.scanner;
+package com.backend.compiladores.services;
 
 import java_cup.runtime.*;
+import com.backend.compiladores.services.ParserSym;
 
 %%
 %public
 %class Lexer
-%type Token
 %cup
 
 digit = [0-9]
@@ -38,8 +38,8 @@ equal =\=
 asignacion =->
 coma =,
 end_instruction =;
-parA =\(
-parC =\)
+Lpar =\(
+Rpar =\)
 queA =\¿
 queC =\?
 
@@ -88,82 +88,94 @@ imprimir_sin_salto=imprimir_nl
 //Variables
 variable = \_{letter}({letter}|{digit})+\_
 
+%{
+
+    StringBuffer string = new StringBuffer ();
+    private Symbol symbol (int type) {
+        return new Symbol(type, yyline, yycolumn);
+    }
+    private Symbol symbol (int type, Object value){
+        return new Symbol (type, yyline, yycolumn, value) ;
+    }
+
+%}
+
 %eofval{
-    return new Token(TokenConstant.EOF,null);
+    return symbol(ParserSym.EOF);
 %eofval}
 
 
 %%
 //Comentarios
-{comment} { return new Token(TokenConstant.COMMENT, yytext());}
+{comment} { symbol(ParserSym.COMENTARIO, yytext());}
 
 //Tipos de datos
-{numero} { return new Token(TokenConstant.NUMERO, yytext()); }
-{string} { return new Token(TokenConstant.STRING, yytext()); }
-{Boolean} { return new Token(TokenConstant.BOOLEAN, yytext()); }
-{character} { return new Token(TokenConstant.CHARACTER, yytext()); }
+{numero} { symbol(ParserSym.NUMERO, yytext()); }
+{string} { symbol(ParserSym.CADENA, yytext()); }
+{Boolean} { symbol(ParserSym.BOOLEAN, yytext()); }
+{character} { symbol(ParserSym.CARACTER, yytext()); }
 
 //Simbolos matematicos
-{suma} { return new Token(TokenConstant.SUMA, yytext()); }
-{resta} { return new Token(TokenConstant.RESTA, yytext()); }
-{multiplicacion} { return new Token(TokenConstant.MULTIPLICACION, yytext()); }
-{division} { return new Token(TokenConstant.DIVISION, yytext()); }
+{suma} { symbol(ParserSym.SUMA, yytext()); }
+{resta} { symbol(ParserSym.RESTA, yytext()); }
+{multiplicacion} { symbol(ParserSym.MULTI, yytext()); }
+{division} { symbol(ParserSym.DIVI, yytext()); }
 
 
 //Sibolos de un solo caracter - Inicio
-{asignacion} { return new Token(TokenConstant.ASIGNACION, yytext()); }
-{coma} { return new Token(TokenConstant.COMA, yytext()); }
-{end_instruction} { return new Token(TokenConstant.END_INSTRUCTION, yytext()); }
-{parA} { return new Token(TokenConstant.PARA, yytext()); }
-{parC} { return new Token(TokenConstant.PARC, yytext()); }
-{queA} { return new Token(TokenConstant.QUEA, yytext()); }
-{queC} { return new Token(TokenConstant.QUEC, yytext()); }
+{asignacion} { symbol(ParserSym.ASIGNACION, yytext()); }
+{coma} { symbol(ParserSym.COMA, yytext()); }
+{end_instruction} { symbol(TokenConstant.END_INSTRUCTION, yytext()); }
+{Lpar} { symbol(ParserSym.LPAREN, yytext()); }
+{Rpar} { symbol(TokenConstant.PARC, yytext()); }
+{queA} { symbol(TokenConstant.QUEA, yytext()); }
+{queC} { symbol(TokenConstant.QUEC, yytext()); }
 
 
 //Palabras reservadas - Tipado
-{tipado_numero} { return new Token(TokenConstant.TIPADO_NUMERO, yytext()); }
-{tipado_cadena} { return new Token(TokenConstant.TIPADO_CADENA, yytext()); }
-{tipado_boolean} { return new Token(TokenConstant.TIPADO_BOOLEAN, yytext()); }
-{tipado_caracter} { return new Token(TokenConstant.TIPADO_CARACTER, yytext()); }
+{tipado_numero} { symbol(TokenConstant.TIPADO_NUMERO, yytext()); }
+{tipado_cadena} { symbol(TokenConstant.TIPADO_CADENA, yytext()); }
+{tipado_boolean} { symbol(TokenConstant.TIPADO_BOOLEAN, yytext()); }
+{tipado_caracter} { symbol(TokenConstant.TIPADO_CARACTER, yytext()); }
 
 //Palabras reservadas - Inicio
-{potencia} { return new Token(TokenConstant.POTENCIA, yytext()); }
-{modulo} { return new Token(TokenConstant.MODULO, yytext()); }
-{inicio} { return new Token(TokenConstant.INICIO, yytext()); }
-{fin} { return new Token(TokenConstant.FIN, yytext()); }
-{ingresar} { return new Token(TokenConstant.INGRESAR, yytext()); }
-{como} { return new Token(TokenConstant.COMO, yytext()); }
-{con_valor} { return new Token(TokenConstant.CON_VALOR, yytext()); }
-{if} { return new Token(TokenConstant.IF, yytext()); }
-{else} { return new Token(TokenConstant.ELSE, yytext()); }
-{else_if} { return new Token(TokenConstant.ELSE_IF, yytext()); }
-{then} { return new Token(TokenConstant.THEN, yytext()); } //repetido en if, select case
-{end_if} { return new Token(TokenConstant.END_IF, yytext()); }
-{select} { return new Token(TokenConstant.SELECT, yytext()); }
-{case} { return new Token(TokenConstant.CASE, yytext()); } //repetido en for , select case, mientras
-{default} { return new Token(TokenConstant.DEFAULT, yytext()); }
-{end_select} { return new Token(TokenConstant.END_SELECT, yytext()); }
-{for} { return new Token(TokenConstant.FOR, yytext()); }
-{to} { return new Token(TokenConstant.TO, yytext()); }
-{end_for} { return new Token(TokenConstant.END_FOR, yytext()); }
-{incremental} { return new Token(TokenConstant.INCREMENTAL, yytext()); }
-{while} { return new Token(TokenConstant.WHILE, yytext()); }
-{end_while} { return new Token(TokenConstant.END_WHILE, yytext()); }
-{repetir} { return new Token(TokenConstant.REPETIR, yytext()); }
-{hasta_que} { return new Token(TokenConstant.HASTA_QUE, yytext()); }
-{return} { return new Token(TokenConstant.RETURN, yytext()); }
-{metodo} { return new Token(TokenConstant.METODO, yytext()); }
-{fin_metodo} { return new Token(TokenConstant.FIN_METODO, yytext()); }
-{con_parametros} { return new Token(TokenConstant.CON_PARAMETROS, yytext()); }
-{function} { return new Token(TokenConstant.FUNCTION, yytext()); }
-{end_function} { return new Token(TokenConstant.NUMERO, yytext()); }
-{ejecutar} { return new Token(TokenConstant.EJECUTAR, yytext()); }
-{imprimir} { return new Token(TokenConstant.IMPRIMIR, yytext()); }
-{imprimir_sin_salto} { return new Token(TokenConstant.IMPRIMIR_SIN_SALTO, yytext()); }
+{potencia} { symbol(TokenConstant.POTENCIA, yytext()); }
+{modulo} { symbol(TokenConstant.MODULO, yytext()); }
+{inicio} { symbol(TokenConstant.INICIO, yytext()); }
+{fin} { symbol(TokenConstant.FIN, yytext()); }
+{ingresar} { symbol(TokenConstant.INGRESAR, yytext()); }
+{como} { symbol(TokenConstant.COMO, yytext()); }
+{con_valor} { symbol(TokenConstant.CON_VALOR, yytext()); }
+{if} { symbol(TokenConstant.IF, yytext()); }
+{else} { symbol(TokenConstant.ELSE, yytext()); }
+{else_if} { symbol(TokenConstant.ELSE_IF, yytext()); }
+{then} { symbol(TokenConstant.THEN, yytext()); } //repetido en if, select case
+{end_if} { symbol(TokenConstant.END_IF, yytext()); }
+{select} { symbol(TokenConstant.SELECT, yytext()); }
+{case} { symbol(TokenConstant.CASE, yytext()); } //repetido en for , select case, mientras
+{default} { symbol(TokenConstant.DEFAULT, yytext()); }
+{end_select} { symbol(TokenConstant.END_SELECT, yytext()); }
+{for} { symbol(TokenConstant.FOR, yytext()); }
+{to} { symbol(TokenConstant.TO, yytext()); }
+{end_for} { symbol(TokenConstant.END_FOR, yytext()); }
+{incremental} { symbol(TokenConstant.INCREMENTAL, yytext()); }
+{while} { symbol(TokenConstant.WHILE, yytext()); }
+{end_while} { symbol(TokenConstant.END_WHILE, yytext()); }
+{repetir} { symbol(TokenConstant.REPETIR, yytext()); }
+{hasta_que} { symbol(TokenConstant.HASTA_QUE, yytext()); }
+{return} { symbol(TokenConstant.RETURN, yytext()); }
+{metodo} { symbol(TokenConstant.METODO, yytext()); }
+{fin_metodo} { symbol(TokenConstant.FIN_METODO, yytext()); }
+{con_parametros} { symbol(TokenConstant.CON_PARAMETROS, yytext()); }
+{function} { symbol(TokenConstant.FUNCTION, yytext()); }
+{end_function} { symbol(TokenConstant.NUMERO, yytext()); }
+{ejecutar} { symbol(TokenConstant.EJECUTAR, yytext()); }
+{imprimir} { symbol(TokenConstant.IMPRIMIR, yytext()); }
+{imprimir_sin_salto} { symbol(TokenConstant.IMPRIMIR_SIN_SALTO, yytext()); }
 
 
 //Variables
-{variable} { return new Token(TokenConstant.VARIABLE,yytext()); }
+{variable} { symbol(TokenConstant.VARIABLE,yytext()); }
 
-{whitespace} {}
-[^] { return new Token(TokenConstant.ERROR, yytext()); }
+{whitespace} {/*SKIP WHITE SPACE*/}
+[^] { symbol(TokenConstant.ERROR, yytext()); }

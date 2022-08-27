@@ -14,8 +14,6 @@ import com.backend.compiladores.services.compilerController;
 @CrossOrigin
 public class mainController {
 
-    
-    compilerController compiler = new compilerController();
 
     @GetMapping("")
     public String saludar(){
@@ -24,11 +22,11 @@ public class mainController {
 
     @PostMapping("/go")
     public String post_compile_go(@RequestBody String code){
-        return this.compiler.compile(code, "go");
+        return compilerController.compile(code, "go");
     };
 
     @PostMapping("/python")
     public String post_compile_python(@RequestBody String code){
-        return this.compiler.compile(code, "python");
+        return compilerController.compile(code, "python");
     };
 }

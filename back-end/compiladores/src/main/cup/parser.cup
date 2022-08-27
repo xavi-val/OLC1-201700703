@@ -1,0 +1,115 @@
+package com.backend.compiladores.services;
+
+import java_cup.runtime.*;
+
+class Parser;
+
+parser code
+{:
+//HACER CASO OMISO A ESTOS ERRORES SI ESTAS USANDO INTELLIJ
+    private Symbol s;
+
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+    public Symbol getS(){
+        return this.s;
+    }
+:};
+
+
+non terminal
+/*Inicio*/
+inicio,
+/*Instrucciones*/
+instruccion,
+/*Expresiones*/
+expr,
+/*Valores*/
+valor,
+/*Declaraciones*/
+declaracion,lista_variables,lista_valores,
+/*Comentario*/
+comentario,
+/*Asignacion*/
+asignar,
+/*condicion*/
+condicion, op_relacional, op_logico
+;
+terminal
+/*Bloque principal o de inicio*/
+INICIO,FIN,
+/*Expresiones*/
+SUMA,RESTA,MULTI,DIVI,POTENCIA,MODULO,LPAREN,RPAREN,
+/*Valores*/
+NUMERO, CADENA, BOOLEAN, CARACTER,
+/*Declaracion*/
+INGRESAR, VARIABLE, COMO, TIPO, CON_VALOR, COMA,
+/*Comentarios*/
+COMENTARIO,
+/*Asignacion*/
+ASIGNACION,
+/*Operadores relacionales y logicos*/
+MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT
+;
+
+/*Precedencia de operadores para expresiones*/
+precedence left SUMA, RESTA;
+precedence left MULTI, DIVI, MODULO;
+precedence left POTENCIA;
+
+/*Precedencia de operadores relacionales y logicos*/
+precedence left MAYOR , MENOR , MAYORIGUAL , MENORIGUAL , IGUAL , DIFERENTE;
+precedence left OR,AND;
+
+
+start with inicio;
+
+inicio ::= comentario | INICIO instruccion FIN | INICIO FIN;
+
+instruccion ::= declaracion
+            | asignar
+            | comentario
+            | instruccion;
+
+/*Comentarios*/
+comentario ::= COMENTARIO;
+
+/*Valores*/
+valor ::= NUMERO | CADENA | BOOLEAN | CARACTER;
+
+/*Expresiones*/
+expr ::= expr SUMA expr
+        |expr RESTA expr
+        |expr MULTI expr
+        |expr DIVI expr
+        |expr MODULO expr
+        |expr POTENCIA expr
+        |LPAREN expr RPAREN
+        |NUMERO;
+
+/*Declaracion*/
+lista_variables ::= VARIABLE COMA lista_variables
+                | VARIABLE;
+
+lista_valores ::= valor COMA lista_valores
+                | valor;
+
+declaracion ::= INGRESAR VARIABLE COMO TIPO CON_VALOR valor
+            |   INGRESAR lista_variables COMO TIPO CON_VALOR lista_valores;
+
+/*Asignacion*/
+asignar ::= VARIABLE ASIGNACION expr
+        | lista_variables ASIGNACION expr ;
+
+/*Condiciones*/
+
+op_relacional ::= MAYOR | MENOR | MAYORIGUAL | MENORIGUAL | IGUAL | DIFERENTE;
+op_logico ::= OR|AND;
+
+condicion ::= expr op_relacional expr
+            | expr op_logico expr
+            | NOT expr;
+
+
