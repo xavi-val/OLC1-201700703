@@ -3,6 +3,8 @@ package com.backend.compiladores.services;
 
 import com.backend.compiladores.services.scanner.Token;
 import com.backend.compiladores.services.traductor.Traductor_Python;
+import java_cup.runtime.ScannerBuffer;
+import java_cup.runtime.Symbol;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -15,7 +17,25 @@ public class compilerController {
     public static String compile(String code, String lenguage){
 
         if ("python".equals(lenguage)) {
-            //LLAMAR AL ANALIZADOR LEXICO Y SINTACTICO
+            //CREANDO UN STRINGREADER PARA LEER EL TEXTO DE ENTRADA
+            Reader stringReader = new StringReader(code);
+            //CREANDO EL ANALIZADOR LEXICO PARA QUE LE PASE LOS TOKENS A EL PARSER
+            Lexer lexerHandler = new Lexer(stringReader);
+            //CREANDO UN BUFFER PARA QUE ME PASE LOS TOKENS AL FINALIZAR EL ANLISIS SITACTICO
+            ScannerBuffer buffer = new ScannerBuffer(lexerHandler);
+            //PASANDO EL BUFFER AL PARSER (DENTRO DEL BUFFER ESTA EL ANALIZADOR LEXICO)
+            Parser p = new Parser(buffer);
+            try {
+                //ANALIZAMOS SINTACTICAMENTE LA ENTRADA
+                p.parse();
+            } catch (Exception e) {
+                //MANEJO DE ERRORES, sym.left = fila, sym.right = columna
+                Symbol sym = p.getS();
+                System.out.println("Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+                throw new RuntimeException(e);
+            }
+
+
 
             return "answer";
         }else if ("go".equals(lenguage)){

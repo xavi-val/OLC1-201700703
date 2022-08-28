@@ -4,6 +4,18 @@ import java_cup.runtime.*;
 
 class Parser;
 
+//VIDEOS USADOS DE REFERENCIA
+
+/*
+https://youtu.be/R6znBEekUVA
+https://youtu.be/4XKelO44u5U
+https://youtu.be/4Z6Tnit810Y
+
+*/
+
+//TAMBIEN RECOMIENDO LEER LA DOCUMENTACION DE JFLEX Y CUP, ES LARGA PERO VALE LA PENA LEERLA
+
+
 parser code
 {:
 //HACER CASO OMISO A ESTOS ERRORES SI ESTAS USANDO INTELLIJ
@@ -23,7 +35,7 @@ non terminal
 /*Inicio*/
 inicio,
 /*Instrucciones*/
-instruccion,
+instruccion, lista_instrucciones,
 /*Expresiones*/
 expr,
 /*Valores*/
@@ -66,18 +78,20 @@ precedence left OR,AND;
 
 start with inicio;
 
-inicio ::= comentario | INICIO instruccion FIN | INICIO FIN;
+inicio ::= INICIO lista_instrucciones FIN;
+
+lista_instrucciones ::= lista_instrucciones instruccion
+                    | /*Vacio*/;
 
 instruccion ::= declaracion
             | asignar
-            | comentario
-            | instruccion;
+            | comentario;
 
 /*Comentarios*/
 comentario ::= COMENTARIO;
 
 /*Valores*/
-valor ::= NUMERO | CADENA | BOOLEAN | CARACTER;
+valor ::= CADENA | BOOLEAN | CARACTER | expr;
 
 /*Expresiones*/
 expr ::= expr SUMA expr
@@ -87,6 +101,7 @@ expr ::= expr SUMA expr
         |expr MODULO expr
         |expr POTENCIA expr
         |LPAREN expr RPAREN
+        |RESTA NUMERO
         |NUMERO;
 
 /*Declaracion*/
@@ -96,12 +111,10 @@ lista_variables ::= VARIABLE COMA lista_variables
 lista_valores ::= valor COMA lista_valores
                 | valor;
 
-declaracion ::= INGRESAR VARIABLE COMO TIPO CON_VALOR valor
-            |   INGRESAR lista_variables COMO TIPO CON_VALOR lista_valores;
+declaracion ::= INGRESAR lista_variables COMO TIPO CON_VALOR lista_valores;
 
 /*Asignacion*/
-asignar ::= VARIABLE ASIGNACION expr
-        | lista_variables ASIGNACION expr ;
+asignar ::= lista_variables ASIGNACION expr;
 
 /*Condiciones*/
 

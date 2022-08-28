@@ -6,11 +6,8 @@ inicio
 */
 
 ingresar _pi_ como numero con_valor 2.1416
-ingresar _multi_operador_ como numero con_valor (-3*(5-6)/5)
+ingresar _multiOperador_ como numero con_valor (-3*(5-6)/5)
 
 _pi_ -> 3.1416
-
-
-
 
 fin
