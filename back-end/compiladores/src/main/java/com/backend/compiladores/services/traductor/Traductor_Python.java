@@ -10,12 +10,7 @@ public class Traductor_Python extends Traductor {
 
 
     public Traductor_Python(){
-
-    }
-
-    @Override
-    public String traducir(ScannerBuffer buffer) {
-        return null;
+        this.final_traduction="";
     }
 
     public String tabular(String texto){
@@ -30,20 +25,57 @@ public class Traductor_Python extends Traductor {
         return sb.toString();
     }
 
+    public void encolar(String texto){
+        this.final_traduction += "\n";
+        this.final_traduction += tabular(texto);
+    }
+
     @Override
-    public String comentario(String comentario) {
+    public void comentario(String comentario) {
 
         String aux = comentario.replaceAll("\\/\\/","#");
         aux = aux.replaceAll("\\/\\*","\'\'\'");
         aux = aux.replaceAll("\\*\\/","\'\'\'");
-
-        return tabular(aux);
+        encolar(aux);
     }
 
     @Override
-    public String inicio(String inicio) {
+    public void inicio(String inicio) {
         this.tabulaciones+=1;
-        return inicio.replaceAll("inicio","if __name__ == \'__main__\':");
+        String aux = inicio.replaceAll("inicio","if __name__ == \'__main__\':");
+        encolar(aux);
+    }
+
+    @Override
+    public String booleano(String booleano) {
+        String aux ="";
+        aux = booleano.replaceAll("Verdadero","True");
+        aux = booleano.replaceAll("Falso","False");
+        return aux;
+    }
+
+    @Override
+    public String character(String character) {
+        Pattern pattern = Pattern.compile("\\$\\{\\d+\\}");
+        Matcher matcher = pattern.matcher(character);
+        boolean matchFound = matcher.find();
+        if(matchFound) {
+            character = character.replaceAll("\\$\\{","");
+            character = character.replaceAll("\\}","");
+
+            return  Character.toString((char) Integer.parseInt(character));
+
+
+        } else {
+            return character;
+        }
+
+    }
+
+    @Override
+    public void declaracion_asignacion(String decl_asig) {
+        String aux ="";
+        aux = decl_asig.replaceAll("con_valor","=");
     }
 
 

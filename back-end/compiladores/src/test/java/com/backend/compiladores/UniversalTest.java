@@ -8,26 +8,15 @@ import java_cup.runtime.ScannerBuffer;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 
 public class UniversalTest {
     String testString = """
-inicio
-//Archivo de prueba, comentario de una linea
-/*
-	Comentarios de varias lineas
-	Javier Andres Valdez Gonzalez - 201700703
-*/
 
-ingresar _pi_ como numero con_valor 2.1416
-ingresar _multiOperador_ como numero con_valor (((-3*(5-6)/5) potencia 2) mod 2)
-
-_pi_ -> 3.1416
-
-fin
                 """ ;
+
+    File file = new File("testing.txt");
+
 
 
     @Test
@@ -55,13 +44,18 @@ fin
     public void testParser(){
 
 
-        Reader stringReader = new StringReader(testString);
-        Lexer lexerHandler = new Lexer(stringReader);
-
-        ScannerBuffer buffer = new ScannerBuffer(lexerHandler);
-        Parser p = new Parser(buffer);
+        Lexer lexerHandler = null;
         try {
-            Object result = p.parse().value;
+            lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        Parser p = new Parser(lexerHandler);
+        p.traductor = new Traductor_Python();
+        try {
+            p.parse();
+            p.traductor.generate_file("Test_file.txt");
         } catch (Exception e) {
 
             Symbol sym = p.getS();
@@ -69,7 +63,7 @@ fin
 
             throw new RuntimeException(e);
         }
-        System.out.println(buffer.getBuffered());
+
 
     }
 
@@ -77,8 +71,7 @@ fin
     public void testTraductorPython(){
 
         Traductor_Python traductor_python = new Traductor_Python();
-
-        System.out.println(traductor_python.comentario("/*Hola mundo \t */ "));
+        System.out.println(traductor_python.character("${85}"));
 
     }
 

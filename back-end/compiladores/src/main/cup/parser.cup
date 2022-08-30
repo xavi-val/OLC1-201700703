@@ -1,6 +1,7 @@
 package com.backend.compiladores.services;
 
 import java_cup.runtime.*;
+import com.backend.compiladores.services.traductor.*;
 
 class Parser;
 
@@ -15,6 +16,11 @@ https://youtu.be/4Z6Tnit810Y
 
 //TAMBIEN RECOMIENDO LEER LA DOCUMENTACION DE JFLEX Y CUP, ES LARGA PERO VALE LA PENA LEERLA
 
+/*RESULT = *** DEVUELVE LA CADENA QUE HICO MATCH CON EL ANALISIS SINTACTICO, SI SOLICITAS EL MATCH
+DE UN NO TERMINAL, AGARRA EL RESULT DE LAS DERIVACIONES DE ESE NO TERMINAL, EN CASO DE NO ENCONTRAR DERIVACION
+CON UNA RESPUESTA RESULT= *** REGRESA UN OBJETO NULL
+*/
+
 
 parser code
 {:
@@ -28,6 +34,20 @@ parser code
     public Symbol getS(){
         return this.s;
     }
+
+    public Traductor traductor;
+
+    /*ARRAY OF OBJECT TO STRING = ats*/
+    private String ats(Object[] array){
+        String answer = "";
+
+        for(int i = 0; i < array.length; i++) {
+          answer+= array[i].toString();
+        }
+
+        return answer;
+    }
+
 :};
 
 
@@ -78,9 +98,11 @@ precedence left OR,AND;
 
 start with inicio;
 
-inicio ::= INICIO lista_instrucciones FIN;
+inicio ::= INICIO:e1 lista_instrucciones FIN {: traductor.inicio(e1.toString()); :}
+        |  comentario inicio;
 
-lista_instrucciones ::= lista_instrucciones instruccion
+
+lista_instrucciones ::=  instruccion:b lista_instrucciones {:  :}
                     | /*Vacio*/;
 
 instruccion ::= declaracion
@@ -88,30 +110,34 @@ instruccion ::= declaracion
             | comentario;
 
 /*Comentarios*/
-comentario ::= COMENTARIO;
+comentario ::= COMENTARIO:a {: traductor.comentario(a.toString()); :};
 
 /*Valores*/
-valor ::= CADENA | BOOLEAN | CARACTER | expr;
+valor ::= CADENA:e1 {: RESULT = e1.toString(); :}
+        | BOOLEAN:e2{: RESULT = e2.toString(); :}
+        | CARACTER:e3{: RESULT = e3.toString(); :}
+        | expr:e4{:RESULT = e4.toString();:};
 
 /*Expresiones*/
-expr ::= expr SUMA expr
-        |expr RESTA expr
-        |expr MULTI expr
-        |expr DIVI expr
-        |expr MODULO expr
-        |expr POTENCIA expr
-        |LPAREN expr RPAREN
-        |RESTA NUMERO
-        |NUMERO;
+expr ::= expr:e1 SUMA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 RESTA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MULTI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 DIVI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MODULO:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 POTENCIA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |LPAREN:e1 expr:e2 RPAREN:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |RESTA:e1 NUMERO:e2 {:RESULT = ats(new Object[] {e1,e2}) ;:}
+        |NUMERO:e1 {: RESULT = ats(new Object[] {e1}) ; :};
 
 /*Declaracion*/
-lista_variables ::= VARIABLE COMA lista_variables
-                | VARIABLE;
+lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {: RESULT = e1.toString() + e2.toString() + e3.toString(); :}
+                | VARIABLE:e1 {: RESULT = e1.toString(); :};
 
-lista_valores ::= valor COMA lista_valores
-                | valor;
+lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = e1.toString() + e2.toString() + e3.toString(); :}
+                | valor:e1 {: RESULT = e1.toString(); :};
 
-declaracion ::= INGRESAR lista_variables COMO TIPO CON_VALOR lista_valores;
+declaracion ::= INGRESAR lista_variables:e1 COMO TIPO CON_VALOR:e2 lista_valores:e3
+{: traductor.declaracion_asignacion(ats(new Object[] {e1,e2,e3}));:};
 
 /*Asignacion*/
 asignar ::= lista_variables ASIGNACION expr;
@@ -122,7 +148,6 @@ op_relacional ::= MAYOR | MENOR | MAYORIGUAL | MENORIGUAL | IGUAL | DIFERENTE;
 op_logico ::= OR|AND;
 
 condicion ::= expr op_relacional expr
-            | expr op_logico expr
-            | NOT expr;
-
+            | condicion op_logico condicion
+            | NOT condicion;
 

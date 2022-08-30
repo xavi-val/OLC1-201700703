@@ -21,10 +21,8 @@ public class compilerController {
             Reader stringReader = new StringReader(code);
             //CREANDO EL ANALIZADOR LEXICO PARA QUE LE PASE LOS TOKENS A EL PARSER
             Lexer lexerHandler = new Lexer(stringReader);
-            //CREANDO UN BUFFER PARA QUE ME PASE LOS TOKENS AL FINALIZAR EL ANLISIS SITACTICO
-            ScannerBuffer buffer = new ScannerBuffer(lexerHandler);
             //PASANDO EL BUFFER AL PARSER (DENTRO DEL BUFFER ESTA EL ANALIZADOR LEXICO)
-            Parser p = new Parser(buffer);
+            Parser p = new Parser(lexerHandler);
             try {
                 //ANALIZAMOS SINTACTICAMENTE LA ENTRADA
                 p.parse();
@@ -34,7 +32,6 @@ public class compilerController {
                 System.out.println("Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
                 throw new RuntimeException(e);
             }
-
 
 
             return "answer";
