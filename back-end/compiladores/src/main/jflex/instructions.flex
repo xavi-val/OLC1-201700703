@@ -15,7 +15,7 @@ letter = [a-zA-Z]
 whitespace = [ \n\t\r]
 
 //Comentarios
-one_line_comment = \/\/[^(\/|\n)]*
+one_line_comment = \/\/[^(\/|\n|\r)]*
 multi_comment = \/\*[\s\S]*\*\/
 comment = ({multi_comment}|{one_line_comment})
 

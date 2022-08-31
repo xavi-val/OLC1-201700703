@@ -2,6 +2,11 @@ package com.backend.compiladores.services;
 
 import java_cup.runtime.*;
 import com.backend.compiladores.services.traductor.*;
+import com.backend.compiladores.services.parserPackage.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 
 class Parser;
 
@@ -11,6 +16,9 @@ class Parser;
 https://youtu.be/R6znBEekUVA
 https://youtu.be/4XKelO44u5U
 https://youtu.be/4Z6Tnit810Y
+
+AST (Abastact Syntax Tree)
+https://youtu.be/kwG1ZOXUS4A
 
 */
 
@@ -25,17 +33,44 @@ CON UNA RESPUESTA RESULT= *** REGRESA UN OBJETO NULL
 parser code
 {:
 //HACER CASO OMISO A ESTOS ERRORES SI ESTAS USANDO INTELLIJ
-    private Symbol s;
+//Reescritura de los metodos nativos de CUP para mi conveniencia
+    public Symbol s;
+    public LinkedList<String> p_list = new LinkedList();
 
+    //Asigna el token de error para despues poder sacarlo con el get
     public void syntax_error(Symbol s){
         this.s = s;
     }
 
-    public Symbol getS(){
+    //Sacamos el token que da error
+    public Symbol getSymbolError(){
         return this.s;
     }
 
-    public Traductor traductor;
+
+    //CUP nos da una lista de los posibles token que se esperaban
+    protected void report_expected_token_ids() {
+        List<Integer> ids = this.expected_token_ids();
+        LinkedList<String> list = new LinkedList();
+        Iterator var3 = ids.iterator();
+
+        while(var3.hasNext()) {
+            Integer expected = (Integer)var3.next();
+            list.add(this.symbl_name_from_id(expected));
+        }
+
+        this.p_list=list;
+    }
+
+    //Sacamos esa lista
+    public LinkedList<String> getExpectedTokens(){
+            return this.p_list;
+    }
+
+    //-----------------------------------------------------------
+
+    public Ast ast = new Ast();
+    public int contador = 1;
 
     /*ARRAY OF OBJECT TO STRING = ats*/
     private String ats(Object[] array){
@@ -98,46 +133,82 @@ precedence left OR,AND;
 
 start with inicio;
 
-inicio ::= INICIO:e1 lista_instrucciones FIN {: traductor.inicio(e1.toString()); :}
-        |  comentario inicio;
+inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
+        {:
+            Nodo tmp = new Nodo("ROOT");
+            tmp.setNumNodo(contador++);
+            tmp.addHijo(new Nodo("Nodo inicio",e1.toString()));
+            tmp.addHijo((Nodo) e2);
+            tmp.addHijo(new Nodo("Nodo final", e3.toString()));
+            ast.raiz = tmp;
+            RESULT=tmp;
+        :}
+        /*|  COMENTARIO:e1 inicio
+        {:
+            Nodo tmp = new Nodo("Inicio");
+            tmp.setNumNodo(contador++);
+            tmp.addHijo(new Nodo(e1));
+            tmp.addHijo(new Nodo(e2));
+            tmp.addHijo((new Nodo(e3));
+            ast.raiz.addHijo(new Nodo(tmp));
+            RESULT=tmp;
+        :}*/;
 
 
-lista_instrucciones ::=  instruccion:b lista_instrucciones {:  :}
-                    | /*Vacio*/;
+lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
+                    {:
+                        Nodo tmp = new Nodo("instruccion");
+                        tmp.setNumNodo(contador++);
+                        tmp.addHijo((Nodo)e1);
+                        tmp.addHijo((Nodo)e2);
+                        RESULT=tmp;
+                     :}
+                     | /*Vacio*/;
 
-instruccion ::= declaracion
-            | asignar
-            | comentario;
+instruccion ::= declaracion:e1
+            {:
+                Nodo tmp = new Nodo("declaracion");
+                tmp.setNumNodo(contador++);
+                tmp.addHijo((Nodo)e1);
+                RESULT=tmp;
+            :}
+            | asignar:e1
+            | COMENTARIO:e1
+            {:
+                Nodo tmp = new Nodo("comentario");
+                tmp.setNumNodo(contador++);
+                tmp.addHijo(new Nodo("Comentario",e1.toString()));
+                RESULT=tmp;
+            :};
 
-/*Comentarios*/
-comentario ::= COMENTARIO:a {: traductor.comentario(a.toString()); :};
+
 
 /*Valores*/
-valor ::= CADENA:e1 {: RESULT = e1.toString(); :}
-        | BOOLEAN:e2{: RESULT = e2.toString(); :}
-        | CARACTER:e3{: RESULT = e3.toString(); :}
-        | expr:e4{:RESULT = e4.toString();:};
+valor ::= CADENA:e1 {:  :}
+        | BOOLEAN:e2{:  :}
+        | CARACTER:e3{:  :}
+        | expr:e4{: :};
 
 /*Expresiones*/
-expr ::= expr:e1 SUMA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |expr:e1 RESTA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |expr:e1 MULTI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |expr:e1 DIVI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |expr:e1 MODULO:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |expr:e1 POTENCIA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |LPAREN:e1 expr:e2 RPAREN:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-        |RESTA:e1 NUMERO:e2 {:RESULT = ats(new Object[] {e1,e2}) ;:}
-        |NUMERO:e1 {: RESULT = ats(new Object[] {e1}) ; :};
+expr ::= expr:e1 SUMA:e2 expr:e3 {:  :}
+        |expr:e1 RESTA:e2 expr:e3 {::}
+        |expr:e1 MULTI:e2 expr:e3 {::}
+        |expr:e1 DIVI:e2 expr:e3 {::}
+        |expr:e1 MODULO:e2 expr:e3 {::}
+        |expr:e1 POTENCIA:e2 expr:e3 {::}
+        |LPAREN:e1 expr:e2 RPAREN:e3 {::}
+        |RESTA:e1 NUMERO:e2 {::}
+        |NUMERO:e1 {:  :};
 
 /*Declaracion*/
-lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {: RESULT = e1.toString() + e2.toString() + e3.toString(); :}
-                | VARIABLE:e1 {: RESULT = e1.toString(); :};
+lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {:  :}
+                | VARIABLE:e1 {:  :};
 
-lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = e1.toString() + e2.toString() + e3.toString(); :}
-                | valor:e1 {: RESULT = e1.toString(); :};
+lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {:  :}
+                | valor:e1 {:  :};
 
 declaracion ::= INGRESAR lista_variables:e1 COMO TIPO CON_VALOR:e2 lista_valores:e3
-{: traductor.declaracion_asignacion(ats(new Object[] {e1,e2,e3}));:};
+{: :};
 
 /*Asignacion*/
 asignar ::= lista_variables ASIGNACION expr;

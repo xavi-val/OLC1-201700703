@@ -4,11 +4,11 @@ import com.backend.compiladores.services.Lexer;
 import com.backend.compiladores.services.Parser;
 import com.backend.compiladores.services.ParserSym;
 import com.backend.compiladores.services.traductor.Traductor_Python;
-import java_cup.runtime.ScannerBuffer;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.LinkedList;
 
 public class UniversalTest {
     String testString = """
@@ -44,22 +44,26 @@ public class UniversalTest {
     public void testParser(){
 
 
-        Lexer lexerHandler = null;
+        Lexer lexerHandler;
         try {
             lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
 
-        Parser p = new Parser(lexerHandler);
-        p.traductor = new Traductor_Python();
+        Parser parser = new Parser(lexerHandler);
+        //p.traductor = new Traductor_Python();
         try {
-            p.parse();
-            p.traductor.generate_file("Test_file.txt");
+            parser.parse();
+            parser.ast.graficarNodo(parser.ast.raiz);
+            //p.traductor.generate_file("Test_file.txt");
         } catch (Exception e) {
 
-            Symbol sym = p.getS();
-            System.out.println("Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+            /*Symbol sym = parser.s;
+            System.out.println(sym);
+            LinkedList<String> expected_tokens = parser.getExpectedTokens();
+            System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );*/
+
 
             throw new RuntimeException(e);
         }

@@ -28,7 +28,7 @@ public class compilerController {
                 p.parse();
             } catch (Exception e) {
                 //MANEJO DE ERRORES, sym.left = fila, sym.right = columna
-                Symbol sym = p.getS();
+                Symbol sym = p.getSymbolError();
                 System.out.println("Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
                 throw new RuntimeException(e);
             }
