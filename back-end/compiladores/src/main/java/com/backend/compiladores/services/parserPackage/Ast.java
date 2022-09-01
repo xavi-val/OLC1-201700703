@@ -7,15 +7,17 @@ import java.io.PrintWriter;
 public class Ast {
     public Nodo raiz = new Nodo("ROOT");
 
-    public void graficar(Nodo raiz){
-        FileWriter archivo = null;
-        PrintWriter pw = null;
+    public void graficar(){
+        FileWriter archivo ;
+        PrintWriter pw ;
         String cadena = graficarNodo(raiz);
 
+        String path = ".\\src\\main\\resources\\trees\\";
+
         try{
-            archivo = new FileWriter("arbol.dot");
+            archivo = new FileWriter(path+"arbol.dot");
             pw = new PrintWriter(archivo);
-            pw.println("digraph G {node[shape=box, style=filled, color=blanchedalmond]; edge[color=chocolate3];rankdir=UD \n");
+            pw.println("digraph G {node[shape=box, style=filled, color=black, fillcolor=white]; edge[color=black];rankdir=UD \n");
             pw.println(cadena);
             pw.println("\n}");
             archivo.close();
@@ -24,7 +26,7 @@ public class Ast {
         }
 
         try {
-            String cmd = "dot -Tpng arbol.dot -o arbol.png";
+            String cmd = "dot -Tpng " + path + "arbol.dot -o " + path + "arbol.png";
             Runtime.getRuntime().exec(cmd);
         } catch (IOException ioe) {
             System.out.println(ioe +" 2");

@@ -6,6 +6,7 @@ import com.backend.compiladores.services.ParserSym;
 import com.backend.compiladores.services.traductor.Traductor_Python;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.matchers.Null;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -55,16 +56,18 @@ public class UniversalTest {
         //p.traductor = new Traductor_Python();
         try {
             parser.parse();
-            parser.ast.graficarNodo(parser.ast.raiz);
+            parser.ast.graficar();
             //p.traductor.generate_file("Test_file.txt");
         } catch (Exception e) {
 
-            /*Symbol sym = parser.s;
-            System.out.println(sym);
+            Symbol sym = parser.s;
             LinkedList<String> expected_tokens = parser.getExpectedTokens();
-            System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );*/
 
+            if(sym != null){
+                System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+            }
 
+            System.out.println(e);
             throw new RuntimeException(e);
         }
 

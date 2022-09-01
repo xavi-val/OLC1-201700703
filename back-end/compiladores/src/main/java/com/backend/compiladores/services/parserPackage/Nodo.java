@@ -1,7 +1,5 @@
 package com.backend.compiladores.services.parserPackage;
 
-import java_cup.runtime.Symbol;
-
 import java.util.ArrayList;
 
 public class Nodo {
@@ -10,7 +8,7 @@ public class Nodo {
     private String nombre;
     private ArrayList<Nodo> hijos = new ArrayList<>();
     private String valor;
-    private int numNodo;
+    private long numNodo;
 
 
     public Nodo()
@@ -37,7 +35,9 @@ public class Nodo {
 
     public void addHijo(Nodo hijo)
     {
-        hijos.add(hijo);
+        if (hijo != null){
+            hijos.add(hijo);
+        }
     }
 
     //SETTERS Y GETTERS
@@ -68,11 +68,11 @@ public class Nodo {
         this.valor = valor;
     }
 
-    public int getNumNodo() {
+    public long getNumNodo() {
         return numNodo;
     }
 
-    public void setNumNodo(int numNodo) {
+    public void setNumNodo(long numNodo) {
         this.numNodo = numNodo;
     }
 }
