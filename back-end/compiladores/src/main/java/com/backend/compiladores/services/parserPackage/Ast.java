@@ -38,10 +38,24 @@ public class Ast {
         String cadena = "";
         for(Nodo hijos : nodo.getHijos())
         {
-            cadena += "\"" + nodo.getNumNodo() + "_" + nodo.getNombre() + " -> " + nodo.getValor() + "\"->\"" + hijos.getNumNodo() + "_" + hijos.getNombre() + " -> " + hijos.getValor() + "\"\n";
+            cadena += "\"" + nodo.getNumNodo() + "_" + nodo.getNombre() + " -> " + parsearComillas(nodo.getValor()) + "\"->\"" + hijos.getNumNodo() + "_" + hijos.getNombre() + " -> " + parsearComillas(hijos.getValor()) + "\"\n";
             cadena += graficarNodo(hijos);
         }
         return cadena;
+    }
+
+    /*graphviz tiene problema cuando detecta el caracter comilla "
+        por lo tanto se le colca como un meta caracter usando la barra invertida
+    */
+
+    public String parsearComillas(String valor){
+
+        if (valor != null){
+            String aux = valor.replaceAll("\\\"","\\\\\\\"");
+            return aux;
+        }
+
+        return null;
     }
 
 }

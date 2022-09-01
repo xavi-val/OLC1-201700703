@@ -31,6 +31,14 @@ public class Nodo {
         this.valor = valor;
     }
 
+    public Nodo(String nombre, String valor, long aumento)
+    {
+        this.nombre = nombre;
+        this.hijos = new ArrayList<>();
+        this.numNodo = aumento;
+        this.valor = valor;
+    }
+
 
 
     public void addHijo(Nodo hijo)

@@ -10,6 +10,16 @@ import java.util.List;
 
 class Parser;
 
+/*
+TO-DOS
+1. Cambiar el analizador lexico para reconosca nuevos tokens:
+    INICIOCOMENTARIO = \/\*
+    FIN COMENTARIO = \*\/
+2. Reorganizar la gramatica de los comentarios adaptandola a los nuevos simbolos
+
+*/
+
+
 //VIDEOS USADOS DE REFERENCIA
 
 /*
@@ -27,6 +37,16 @@ https://youtu.be/kwG1ZOXUS4A
 /*RESULT = *** DEVUELVE LA CADENA QUE HICO MATCH CON EL ANALISIS SINTACTICO, SI SOLICITAS EL MATCH
 DE UN NO TERMINAL, AGARRA EL RESULT DE LAS DERIVACIONES DE ESE NO TERMINAL, EN CASO DE NO ENCONTRAR DERIVACION
 CON UNA RESPUESTA RESULT= *** REGRESA UN OBJETO NULL
+*/
+
+/*
+Documentacion comentarios hechos mas abajo
+
+terminal indica un simbolo terminal
+no terminal indica un simbolo no terminal
+terminal-indirecto -> lo que hace el programa es reune toda la cadena de caracteres que viene del no terminal y lo junta en ese terminal indirecto
+
+
 */
 
 
@@ -139,9 +159,9 @@ inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
         {:
             Nodo tmp = new Nodo("Global");
             tmp.setNumNodo(contador++);
-            tmp.addHijo(new Nodo("Nodo inicio",e1.toString()));
+            tmp.addHijo(new Nodo("Nodo inicio",e1.toString(),contador++));
             tmp.addHijo((Nodo) e2);
-            tmp.addHijo(new Nodo("Nodo final", e3.toString()));
+            tmp.addHijo(new Nodo("Nodo final", e3.toString(),contador++));
             ast.raiz = tmp;
             RESULT=tmp;
         :}
@@ -169,151 +189,50 @@ lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
 
 instruccion ::= declaracion:e1
             {:
-                Nodo tmp = new Nodo("declaracion");
-                tmp.setNumNodo(contador++);
-                tmp.addHijo((Nodo)e1);
-                RESULT=tmp;
+                RESULT=e1;
             :}
             | asignar:e1
             | COMENTARIO:e1
             {:
-                Nodo tmp = new Nodo("comentario",e1.toString());
+                Nodo tmp = new Nodo("comentario",e1.toString(),contador++);
                 tmp.setNumNodo(contador++);
                 RESULT=tmp;
             :};
 
 /*Valores*/
-valor ::= CADENA:e1 {:
-                    Nodo tmp = new Nodo("Cadena",e1.toString());
-                    tmp.setNumNodo(contador++);
-                    RESULT=tmp;
-                     :}
-        | BOOLEAN:e2{:
-                    Nodo tmp = new Nodo("Boolean",e2.toString());
-                    tmp.setNumNodo(contador++);
-                    RESULT=tmp;
-                    :}
-        | CARACTER:e3{:
-                    Nodo tmp = new Nodo("Caracter",e3.toString());
-                    tmp.setNumNodo(contador++);
-                    RESULT=tmp;
-         :}
-        | expr:e4{:
-                    Nodo tmp = new Nodo("expresion");
-                    tmp.setNumNodo(contador++);
-                    tmp.addHijo((Nodo)e4);
-                    RESULT=tmp;
-        :};
+valor ::= CADENA:e1 {: RESULT =  ats(new Object[] {e1}) ; :}
+        | BOOLEAN:e2 {: RESULT = ats(new Object[] {e2}) ; :}
+        | CARACTER:e3 {: RESULT = ats(new Object[] {e3}) ; :}
+        | expr:e4 {: RESULT = ats(new Object[] {e4}) ; :};
 
 /*Expresiones*/
-expr ::= expr:e1 SUMA:e2 expr:e3 {:
-            Nodo tmp = new Nodo("suma");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("suma",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |expr:e1 RESTA:e2 expr:e3 {:
-            Nodo tmp = new Nodo("resta");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("resta",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |expr:e1 MULTI:e2 expr:e3 {:
-            Nodo tmp = new Nodo("multi");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("multi",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |expr:e1 DIVI:e2 expr:e3 {:
-            Nodo tmp = new Nodo("divi");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("divi",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |expr:e1 MODULO:e2 expr:e3 {:
-            Nodo tmp = new Nodo("modulo");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("modulo",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |expr:e1 POTENCIA:e2 expr:e3 {:
-            Nodo tmp = new Nodo("potencia");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo((Nodo) e1) /*no terminal*/;
-            tmp.addHijo(new Nodo("potencia",e2.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e3) /*no terminal*/;
-            RESULT=tmp;
-        :}
-        |LPAREN:e1 expr:e2 RPAREN:e3 {:
-            Nodo tmp = new Nodo("parentesis");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo(new Nodo("LParen",e1.toString())) /*terminal*/;
-            tmp.addHijo((Nodo) e2) /*no terminal*/;
-            tmp.addHijo(new Nodo("Rparen",e3.toString())) /*terminal*/;
-            RESULT=tmp;
-        :}
-        |RESTA:e1 NUMERO:e2 {:
-            Nodo tmp = new Nodo("negativo",(e1.toString()+e2.toString()));
-            tmp.setNumNodo(contador++);
-            RESULT=tmp;
-
-        :}
-        |NUMERO:e1 {:
-            Nodo tmp = new Nodo("numero",e1.toString());
-            tmp.setNumNodo(contador++);
-            RESULT=tmp;
-         :};
+expr ::= expr:e1 SUMA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 RESTA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MULTI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 DIVI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MODULO:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 POTENCIA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |LPAREN:e1 expr:e2 RPAREN:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |RESTA:e1 NUMERO:e2 {:RESULT = ats(new Object[] {e1,e2}) ;:}
+        |NUMERO:e1 {: RESULT = ats(new Object[] {e1}) ; :};
 
 /*Declaracion*/
-lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {:
-                    Nodo tmp = new Nodo("variables");
-                    tmp.setNumNodo(contador++);
-                    tmp.addHijo(new Nodo("Variable",e1.toString())) /*terminal*/;
-                    tmp.addHijo(new Nodo("Coma",e2.toString())) /*terminal*/;
-                    tmp.addHijo((Nodo) e3) /*no terminal*/;
-                    RESULT=tmp;
-                :}
-                | VARIABLE:e1 {:
-                    Nodo tmp = new Nodo("variable",e1.toString());
-                    tmp.setNumNodo(contador++);
-                    RESULT=tmp;
-                 :};
+lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+                | VARIABLE:e1 {: RESULT = ats(new Object[] {e1}) ;:};
 
-lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {:
-                    Nodo tmp = new Nodo("valores");
-                    tmp.setNumNodo(contador++);
-                    tmp.addHijo((Nodo) e1) /*no terminal*/;
-                    tmp.addHijo(new Nodo("COMA",e2.toString())) /*terminal*/;
-                    tmp.addHijo((Nodo) e3) /*no terminal*/;
-                    RESULT=tmp;
-                :}
-                | valor:e1 {:
-                    Nodo tmp = new Nodo("valores");
-                    tmp.setNumNodo(contador++);
-                    tmp.addHijo((Nodo)e1);
-                    RESULT=tmp;
-                 :};
+lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+                | valor:e1 {: RESULT = ats(new Object[] {e1}) ;:};
 
 declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6
 {:
     Nodo tmp = new Nodo("declaracion");
     tmp.setNumNodo(contador++);
-    tmp.addHijo(new Nodo("Ingresar",e1.toString())) /*terminal*/;
-    tmp.addHijo((Nodo) e2) /*no terminal*/;
-    tmp.addHijo(new Nodo("COMO",e3.toString())) /*terminal*/;
-    tmp.addHijo(new Nodo("TIPO",e4.toString())) /*terminal*/;
-    tmp.addHijo(new Nodo("CON_VALOR",e5.toString())) /*terminal*/;
-    tmp.addHijo((Nodo) e6) /*no terminal*/;
+    tmp.addHijo(new Nodo("Ingresar",e1.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Variables",e2.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo("COMO",e3.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("TIPO",e4.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("CON_VALOR",e5.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Valores",e6.toString(),contador++)) /*terminal-indirecto*/;
     RESULT=tmp;
  :};
 

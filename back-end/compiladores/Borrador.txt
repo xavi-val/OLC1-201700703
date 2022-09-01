@@ -1,3 +1,5 @@
+Borrador
+
 inicio
 //Archivo de prueba, comentario de una linea
 
@@ -7,10 +9,12 @@ inicio
 */
 
 
+
 ingresar _pi_ como numero con_valor 2.1416
 
 ingresar _multiOperador_ como numero con_valor (((-1*(2-3+4)/5) potencia 6) mod 2)
 
+ingresar _expresion_,_string_,_boolean1_,_boolean2_,_caracter1_,_caracter2_ como numero con_valor (5*2),"Hola mundo",Verdadero,Falso,'a','${75}'
 
 
-fin
+_pi_ -> 3.1416
