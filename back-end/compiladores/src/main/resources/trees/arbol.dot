@@ -1,30 +1,9 @@
 digraph G {node[shape=box, style=filled, color=black, fillcolor=white]; edge[color=black];rankdir=UD 
 
-"23_Global -> null"->"24_Nodo inicio -> inicio"
-"23_Global -> null"->"22_instruccion -> null"
-"22_instruccion -> null"->"2_comentario -> //Archivo de prueba, comentario de una linea"
-"22_instruccion -> null"->"21_instruccion -> null"
-"21_instruccion -> null"->"4_comentario -> /*
-	Comentarios de varias lineas
-	Javier Andres Valdez Gonzalez - 201700703
-*/"
-"21_instruccion -> null"->"20_instruccion -> null"
-"20_instruccion -> null"->"5_declaracion -> null"
-"5_declaracion -> null"->"6_Ingresar -> ingresar"
-"5_declaracion -> null"->"7_Variables -> _pi_"
-"5_declaracion -> null"->"8_COMO -> como"
-"5_declaracion -> null"->"9_TIPO -> numero"
-"5_declaracion -> null"->"10_CON_VALOR -> con_valor"
-"5_declaracion -> null"->"11_Valores -> 2.1416"
-"20_instruccion -> null"->"19_instruccion -> null"
-"19_instruccion -> null"->"12_declaracion -> null"
-"12_declaracion -> null"->"13_Ingresar -> ingresar"
-"12_declaracion -> null"->"14_Variables -> _multiOperador_"
-"12_declaracion -> null"->"15_COMO -> como"
-"12_declaracion -> null"->"16_TIPO -> numero"
-"12_declaracion -> null"->"17_CON_VALOR -> con_valor"
-"12_declaracion -> null"->"18_Valores -> (((-1*(2-3+4)/5)potencia6)mod2)"
-"23_Global -> null"->"25_Nodo final -> fin"
+"28_Global -> null"->"29_Nodo inicio -> inicio"
+"28_Global -> null"->"27_instruccion -> null"
+"27_instruccion -> null"->"26_instruccion -> null"
+"28_Global -> null"->"30_Nodo final -> fin"
 
 
 }

@@ -11,7 +11,7 @@ RESULT=tmp;
 
 Modelo para simbolo terminal:--------------
 
-Nodo tmp = new Nodo("comentario",e1.toString());
+Nodo tmp = new Nodo("Ingresar",e1.toString(),contador++);
 tmp.setNumNodo(contador++);
 RESULT=tmp;
 
@@ -20,6 +20,6 @@ Modelo para simbolos mixtos:---------------
 
 Nodo tmp = new Nodo("Global");
 tmp.setNumNodo(contador++);
-tmp.addHijo(new Nodo("Nodo inicio",e1.toString())) /*terminal*/;
+tmp.addHijo(new Nodo("Ingresar",e1.toString(),contador++)) /*terminal*/;
 tmp.addHijo((Nodo) e2) /*no terminal*/;
 RESULT=tmp;

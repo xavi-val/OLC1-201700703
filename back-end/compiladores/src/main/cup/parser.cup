@@ -10,14 +10,7 @@ import java.util.List;
 
 class Parser;
 
-/*
-TO-DOS
-1. Cambiar el analizador lexico para reconosca nuevos tokens:
-    INICIOCOMENTARIO = \/\*
-    FIN COMENTARIO = \*\/
-2. Reorganizar la gramatica de los comentarios adaptandola a los nuevos simbolos
 
-*/
 
 
 //VIDEOS USADOS DE REFERENCIA
@@ -29,6 +22,9 @@ https://youtu.be/4Z6Tnit810Y
 
 AST (Abastact Syntax Tree)
 https://youtu.be/kwG1ZOXUS4A
+
+Documentacion sobre errores que puede dar JCUP
+http://hackerdan.com/
 
 */
 
@@ -120,11 +116,13 @@ valor,
 /*Declaraciones*/
 declaracion,lista_variables,lista_valores,
 /*Comentario*/
-comentario,
+
 /*Asignacion*/
 asignar,
 /*condicion*/
-condicion, op_relacional, op_logico
+condicion, op_relacional, op_logico,
+/*Condicionales*/
+if, elseif, else, lista_elseif
 ;
 terminal
 /*Bloque principal o de inicio*/
@@ -140,7 +138,9 @@ COMENTARIO,
 /*Asignacion*/
 ASIGNACION,
 /*Operadores relacionales y logicos*/
-MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT
+MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT,
+/*Condicionales*/
+IF,THEN,END_IF, ELSE, ELSE_IF
 ;
 
 /*Precedencia de operadores para expresiones*/
@@ -167,11 +167,7 @@ inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
         :}
         /*|  COMENTARIO:e1 inicio
         {:
-            Nodo tmp = new Nodo("Inicio");
-            tmp.setNumNodo(contador++);
-            tmp.addHijo(new Nodo(e1));
-            tmp.addHijo(new Nodo(e2));
-            tmp.addHijo((new Nodo(e3));
+            Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
             ast.raiz.addHijo(new Nodo(tmp));
             RESULT=tmp;
         :}*/;
@@ -188,16 +184,18 @@ lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
                      | /*Vacio*/;
 
 instruccion ::= declaracion:e1
+            {:RESULT=e1;:}
+            | asignar:e2
+            {:RESULT=e2;:}
+            | if:e3
+            {:RESULT=e3;:}
+            | COMENTARIO:e20
             {:
-                RESULT=e1;
-            :}
-            | asignar:e1
-            | COMENTARIO:e1
-            {:
-                Nodo tmp = new Nodo("comentario",e1.toString(),contador++);
+                Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
                 tmp.setNumNodo(contador++);
                 RESULT=tmp;
             :};
+
 
 /*Valores*/
 valor ::= CADENA:e1 {: RESULT =  ats(new Object[] {e1}) ; :}
@@ -225,7 +223,7 @@ lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = ats(new Object[]
 
 declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6
 {:
-    Nodo tmp = new Nodo("declaracion");
+    Nodo tmp = new Nodo("Declaracion");
     tmp.setNumNodo(contador++);
     tmp.addHijo(new Nodo("Ingresar",e1.toString(),contador++)) /*terminal*/;
     tmp.addHijo(new Nodo("Variables",e2.toString(),contador++)) /*terminal-indirecto*/;
@@ -237,14 +235,52 @@ declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 list
  :};
 
 /*Asignacion*/
-asignar ::= lista_variables ASIGNACION expr;
+asignar ::= lista_variables:e1 ASIGNACION:e2 expr:e3
+{:
+    Nodo tmp = new Nodo("Asignacion");
+    tmp.setNumNodo(contador++);
+    tmp.addHijo(new Nodo("Variables",e1.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Expresion",e3.toString(),contador++)) /*terminal-indirecto*/;
+    RESULT=tmp;
+:} ;
 
 /*Condiciones*/
 
-op_relacional ::= MAYOR | MENOR | MAYORIGUAL | MENORIGUAL | IGUAL | DIFERENTE;
-op_logico ::= OR|AND;
+op_relacional ::= MAYOR:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MENOR:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MAYORIGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MENORIGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | IGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | DIFERENTE:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                ;
+op_logico ::= OR:e1 {:RESULT = ats(new Object[] {e1}) ;:}
+            |AND:e1 {:RESULT = ats(new Object[] {e1}) ;:};
 
-condicion ::= expr op_relacional expr
-            | condicion op_logico condicion
-            | NOT condicion;
+condicion ::= expr:e1 op_relacional:e2 expr:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | condicion:e1 op_logico:e2 condicion:e3
+            {:RESULT = ats(new Object[] {e1},e2,e3) ;:}
+            | NOT:e1 condicion:e2
+            {:RESULT = ats(new Object[] {e1,e2}) ;:}
+            | BOOLEAN:e1
+            {:RESULT = ats(new Object[] {e1}) ;:};
+
+/*IF*/
+
+
+elseif ::= ELSE_IF:e1 condicion:e2 THEN:e3 lista_instrucciones:e4 elseif:e5
+        | /*Vacio*/;
+
+else ::= ELSE lista_instrucciones
+       | /*Vacio*/;
+
+if ::=  IF condicion THEN lista_instrucciones END_IF
+    |   IF condicion lista_instrucciones elseif else END_IF;
 

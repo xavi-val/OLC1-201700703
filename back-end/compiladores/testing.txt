@@ -1,16 +1,19 @@
 inicio
-//Archivo de prueba, comentario de una linea
 
-/*
-	Comentarios de varias lineas
-	Javier Andres Valdez Gonzalez - 201700703
-*/
+si 5 mayor 4 entonces
+	_var1_ -> 8*8
+fin_si
 
 
-ingresar _pi_ como numero con_valor 2.1416
-
-ingresar _multiOperador_ como numero con_valor (((-1*(2-3+4)/5) potencia 6) mod 2)
-
+si not 5 mayor_o_igual 4
+	_var1_ -> 8*8
+o_si (8+5) menor (10*2) entonces
+	_var1_ -> 10*10
+o_si Verdadero entonces
+	_var1_ -> (5-3*2)
+de_lo_contrario
+	_var1_ -> (9*9)
+fin_si
 
 
 fin

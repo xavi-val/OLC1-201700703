@@ -21,10 +21,10 @@ public class UniversalTest {
 
 
     @Test
-    public void seeTokens(){
+    public void seeTokens() throws FileNotFoundException {
 
-        Reader stringReader = new StringReader(testString);
-        Lexer lexerHandler = new Lexer(stringReader);
+
+        Lexer lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
 
         while (!lexerHandler.yyatEOF()){
             try {

@@ -15,9 +15,14 @@ letter = [a-zA-Z]
 whitespace = [ \n\t\r]
 
 //Comentarios
-one_line_comment = \/\/[^(\/|\n|\r)]*
-multi_comment = \/\*([\s\S])*?\*\/
-comment = ({multi_comment}|{one_line_comment})
+LineTerminator = \r|\n|\r\n
+InputCharacter = [^\r\n]
+
+TraditionalComment   = "/*" [^*] ~"*/" | "/*" "*"+ "/" /*Comentarios multilinea*/
+// Comment can be the last line of the file, without line terminator.
+EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}? /*Comentarios de una linea*/
+comment = {TraditionalComment} | {EndOfLineComment}
+
 
 //Tipos de datos
 decimal = {digit}+(\.)?{digit}+
@@ -71,7 +76,7 @@ fin =fin
 ingresar =ingresar
 como =como
 con_valor =con_valor
-if =si
+if=si
 else =de_lo_contrario
 else_if =o_si
 then =entonces //repetido en if, select case
@@ -173,11 +178,11 @@ variable = \_{letter}({letter}|{digit})+\_
 {ingresar} { return symbol(ParserSym.INGRESAR, yytext()); } //O
 {como} { return symbol(ParserSym.COMO, yytext()); } //O
 {con_valor} { return symbol(ParserSym.CON_VALOR, yytext()); } //O
-//{if} { symbol(ParserSym.IF, yytext()); }
-//{else} { symbol(ParserSym.ELSE, yytext()); }
-//{else_if} { symbol(ParserSym.ELSE_IF, yytext()); }
-//{then} { symbol(ParserSym.THEN, yytext()); } //repetido en if, select case
-//{end_if} { symbol(ParserSym.END_IF, yytext()); }
+{if} { return symbol(ParserSym.IF, yytext()); } //O
+{else} { return symbol(ParserSym.ELSE, yytext()); } //0
+{else_if} { return symbol(ParserSym.ELSE_IF, yytext()); }//O
+{then} { return symbol(ParserSym.THEN, yytext()); } //repetido en if, select case O
+{end_if} { return symbol(ParserSym.END_IF, yytext()); } //O
 //{select} { symbol(ParserSym.SELECT, yytext()); }
 //{case} { symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras
 //{default} { symbol(ParserSym.DEFAULT, yytext()); }
