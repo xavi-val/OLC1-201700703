@@ -276,6 +276,15 @@ condicion ::= expr:e1 op_relacional:e2 expr:e3
 
 
 elseif ::= ELSE_IF:e1 condicion:e2 THEN:e3 lista_instrucciones:e4 elseif:e5
+        {:
+            Nodo tmp = new Nodo("ELSE_IF");
+            tmp.setNumNodo(contador++);
+            tmp.addHijo(new Nodo("Asignar",e1.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("Expresion",e3.toString(),contador++)) /*terminal-indirecto*/;
+            tmp.addHijo((Nodo)e4);
+            RESULT=tmp;
+        :}
         | /*Vacio*/;
 
 else ::= ELSE lista_instrucciones
