@@ -1,19 +1,6 @@
 inicio
+ingresaR _v1_, _v2_, _v3_ cOmo CadenA con_vAlor "esta es una cadena";
 
-si 5 mayor 4 entonces
-	_var1_ -> 8*8
-fin_si
-
-
-si not 5 mayor_o_igual 4
-	_var1_ -> 8*8
-o_si (8+5) menor (10*2) entonces
-	_var1_ -> 10*10
-o_si Verdadero entonces
-	_var1_ -> (5-3*2)
-de_lo_contrario
-	_var1_ -> (9*9)
-fin_si
-
+bueno bueno bueno
 
 fin

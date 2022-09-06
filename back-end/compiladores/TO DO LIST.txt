@@ -1,0 +1,18 @@
+TO DO LIST
+
+/*
+TO-DOS
+1. Seleccion multiple
+2. Ciclo for
+3. Ciclo while
+4. Ciclo do-while
+5. retorno
+6. metodo
+7. funciones
+8. llamada a funciones
+9. impresion
+
+-------------Traduccion---------------
+
+
+*/

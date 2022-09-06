@@ -9,6 +9,8 @@ import com.backend.compiladores.services.ParserSym;
 %cup
 %line
 %column
+%caseless
+%ignorecase
 
 digit = [0-9]
 letter = [a-zA-Z]
@@ -56,11 +58,11 @@ not=not
 //Sibolos de un solo caracter - Inicio
 asignacion =->
 coma =,
-end_instruction =;
+semi_colon =bueno
 Lpar =\(
 Rpar =\)
-queA =\¿
-queC =\?
+Lque =\¿
+Rque =\?
 
 //Palabras reservadas - TIPADO
 tipado_numero = numero|número|Número|Numero|NUMERO|NÚMERO
@@ -157,11 +159,11 @@ variable = \_{letter}({letter}|{digit})+\_
 //Sibolos de un solo caracter - Inicio
 {asignacion} { return symbol(ParserSym.ASIGNACION, yytext()); } //O
 {coma} { return symbol(ParserSym.COMA, yytext()); }//O
-//{end_instruction} { symbol(ParserSym.END_INSTRUCTION, yytext()); }
+{semi_colon} { symbol(ParserSym.SEMI_COLON, yytext()); }
 {Lpar} { return symbol(ParserSym.LPAREN, yytext()); } //O
 {Rpar} { return symbol(ParserSym.RPAREN, yytext()); } //O
-//{queA} { symbol(ParserSym.QUEA, yytext()); }
-//{queC} { symbol(ParserSym.QUEC, yytext()); }
+{Lque} { symbol(ParserSym.LQUE, yytext()); } //0
+{Rque} { symbol(ParserSym.RQUE, yytext()); } //0
 
 
 //Palabras reservadas - Tipado
@@ -181,12 +183,12 @@ variable = \_{letter}({letter}|{digit})+\_
 {if} { return symbol(ParserSym.IF, yytext()); } //O
 {else} { return symbol(ParserSym.ELSE, yytext()); } //0
 {else_if} { return symbol(ParserSym.ELSE_IF, yytext()); }//O
-{then} { return symbol(ParserSym.THEN, yytext()); } //repetido en if, select case O
+{then} { return symbol(ParserSym.THEN, yytext()); } //repetido en if, select case //O
 {end_if} { return symbol(ParserSym.END_IF, yytext()); } //O
-//{select} { symbol(ParserSym.SELECT, yytext()); }
-//{case} { symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras
-//{default} { symbol(ParserSym.DEFAULT, yytext()); }
-//{end_select} { symbol(ParserSym.END_SELECT, yytext()); }
+{select} { symbol(ParserSym.SELECT, yytext()); } //0
+{case} { symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras //0
+{default} { symbol(ParserSym.DEFAULT, yytext()); } //0
+{end_select} { symbol(ParserSym.END_SELECT, yytext()); } //0
 //{for} { symbol(ParserSym.FOR, yytext()); }
 //{to} { symbol(ParserSym.TO, yytext()); }
 //{end_for} { symbol(ParserSym.END_FOR, yytext()); }
@@ -210,4 +212,4 @@ variable = \_{letter}({letter}|{digit})+\_
 {variable} { return symbol(ParserSym.VARIABLE,yytext()); }
 
 {whitespace} {/*SKIP WHITE SPACE*/}
-[^] { return symbol(ParserSym.error, yytext()); }
+[^] { return symbol(ParserSym.ERROR, yytext()); }

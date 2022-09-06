@@ -122,7 +122,10 @@ asignar,
 /*condicion*/
 condicion, op_relacional, op_logico,
 /*Condicionales*/
-if, elseif, else, lista_elseif
+if, elseif, else,
+/*SELECT CASE*/
+select_case, list_case
+
 ;
 terminal
 /*Bloque principal o de inicio*/
@@ -132,7 +135,7 @@ SUMA,RESTA,MULTI,DIVI,POTENCIA,MODULO,LPAREN,RPAREN,
 /*Valores*/
 NUMERO, CADENA, BOOLEAN, CARACTER,
 /*Declaracion*/
-INGRESAR, VARIABLE, COMO, TIPO, CON_VALOR, COMA,
+INGRESAR, VARIABLE, COMO, TIPO, CON_VALOR, COMA, SEMI_COLON,
 /*Comentarios*/
 COMENTARIO,
 /*Asignacion*/
@@ -140,7 +143,12 @@ ASIGNACION,
 /*Operadores relacionales y logicos*/
 MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT,
 /*Condicionales*/
-IF,THEN,END_IF, ELSE, ELSE_IF
+IF,THEN,END_IF, ELSE, ELSE_IF,
+/*SELECT -CASE*/
+SELECT,CASE,DEFAULT,END_SELECT,LQUE,RQUE,
+
+/*ERRORES*/
+ERROR
 ;
 
 /*Precedencia de operadores para expresiones*/
@@ -165,12 +173,7 @@ inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
             ast.raiz = tmp;
             RESULT=tmp;
         :}
-        /*|  COMENTARIO:e1 inicio
-        {:
-            Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
-            ast.raiz.addHijo(new Nodo(tmp));
-            RESULT=tmp;
-        :}*/;
+        |  ERROR:e1{::};
 
 
 lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
@@ -189,6 +192,8 @@ instruccion ::= declaracion:e1
             {:RESULT=e2;:}
             | if:e3
             {:RESULT=e3;:}
+            | select_case:e3
+            {:RESULT=e3;:}
             | COMENTARIO:e20
             {:
                 Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
@@ -199,7 +204,7 @@ instruccion ::= declaracion:e1
 
 /*Valores*/
 valor ::= CADENA:e1 {: RESULT =  ats(new Object[] {e1}) ; :}
-        | BOOLEAN:e2 {: RESULT = ats(new Object[] {e2}) ; :}
+        | condicion:e2 {: RESULT = ats(new Object[] {e2}) ; :} /*condicion esta declarado mas abajo 👇 */
         | CARACTER:e3 {: RESULT = ats(new Object[] {e3}) ; :}
         | expr:e4 {: RESULT = ats(new Object[] {e4}) ; :};
 
@@ -221,7 +226,7 @@ lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {: RESULT = ats(new O
 lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ;:}
                 | valor:e1 {: RESULT = ats(new Object[] {e1}) ;:};
 
-declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6
+declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6 SEMI_COLON:e7
 {:
     Nodo tmp = new Nodo("Declaracion");
     tmp.setNumNodo(contador++);
@@ -231,17 +236,19 @@ declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 list
     tmp.addHijo(new Nodo("TIPO",e4.toString(),contador++)) /*terminal*/;
     tmp.addHijo(new Nodo("CON_VALOR",e5.toString(),contador++)) /*terminal*/;
     tmp.addHijo(new Nodo("Valores",e6.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo(";",e7.toString(),contador++)) /*terminal*/;
     RESULT=tmp;
  :};
 
 /*Asignacion*/
-asignar ::= lista_variables:e1 ASIGNACION:e2 expr:e3
+asignar ::= lista_variables:e1 ASIGNACION:e2 expr:e3 SEMI_COLON:e4
 {:
     Nodo tmp = new Nodo("Asignacion");
     tmp.setNumNodo(contador++);
     tmp.addHijo(new Nodo("Variables",e1.toString(),contador++)) /*terminal-indirecto*/;
     tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
     tmp.addHijo(new Nodo("Expresion",e3.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo(";",e4.toString(),contador++)) /*terminal*/;
     RESULT=tmp;
 :} ;
 
@@ -263,10 +270,16 @@ op_relacional ::= MAYOR:e1
 op_logico ::= OR:e1 {:RESULT = ats(new Object[] {e1}) ;:}
             |AND:e1 {:RESULT = ats(new Object[] {e1}) ;:};
 
-condicion ::= expr:e1 op_relacional:e2 expr:e3
+condicion ::= VARIABLE:e1 op_relacional:e2 VARIABLE:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | VARIABLE:e1 op_relacional:e2 expr:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | expr:e1 op_relacional:e2 VARIABLE:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | expr:e1 op_relacional:e2 expr:e3
             {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
             | condicion:e1 op_logico:e2 condicion:e3
-            {:RESULT = ats(new Object[] {e1},e2,e3) ;:}
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
             | NOT:e1 condicion:e2
             {:RESULT = ats(new Object[] {e1,e2}) ;:}
             | BOOLEAN:e1
@@ -277,19 +290,55 @@ condicion ::= expr:e1 op_relacional:e2 expr:e3
 
 elseif ::= ELSE_IF:e1 condicion:e2 THEN:e3 lista_instrucciones:e4 elseif:e5
         {:
-            Nodo tmp = new Nodo("ELSE_IF");
+            Nodo tmp = new Nodo("ELSE_IF",e1.toString(),contador++);
             tmp.setNumNodo(contador++);
-            tmp.addHijo(new Nodo("Asignar",e1.toString(),contador++)) /*terminal*/;
-            tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
-            tmp.addHijo(new Nodo("Expresion",e3.toString(),contador++)) /*terminal-indirecto*/;
+            tmp.addHijo(new Nodo("condicion",e2.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("THEN",e3.toString(),contador++)) /*terminal*/;
             tmp.addHijo((Nodo)e4);
+            if(e5.toString()!=""){
+                tmp.addHijo((Nodo)e5);
+            }
             RESULT=tmp;
         :}
-        | /*Vacio*/;
+        | {:RESULT="";:} /*Vacio*/;
 
-else ::= ELSE lista_instrucciones
-       | /*Vacio*/;
+else ::= ELSE:e1 lista_instrucciones:e2
+        {:
+            Nodo tmp = new Nodo("ELSE",e1.toString(),contador++);
+            tmp.setNumNodo(contador++);
+            tmp.addHijo((Nodo)e2);
+        :}
+       | {:RESULT="";:} /*Vacio*/;
 
-if ::=  IF condicion THEN lista_instrucciones END_IF
-    |   IF condicion lista_instrucciones elseif else END_IF;
+if ::=  IF:e1 condicion:e2 THEN:e3 lista_instrucciones:e4 END_IF:e5
+    {:
+        Nodo tmp = new Nodo("IF",e1.toString(),contador++);
+        tmp.setNumNodo(contador++);
+        tmp.addHijo(new Nodo("condicion",e2.toString(),contador++)) /*terminal*/;
+        tmp.addHijo(new Nodo("THEN",e3.toString(),contador++)) /*terminal*/;
+        tmp.addHijo((Nodo)e4);
+        tmp.addHijo(new Nodo("END_IF",e5.toString(),contador++)) /*terminal*/;
+        RESULT=tmp;
+    :}
+    |   IF:e1 condicion:e2 lista_instrucciones:e3 elseif:e4 else:e5 END_IF:e6
+    {:
+        Nodo tmp = new Nodo("IF",e1.toString(),contador++);
+        tmp.setNumNodo(contador++);
+        tmp.addHijo(new Nodo("condicion",e2.toString(),contador++)) /*terminal*/;
+        tmp.addHijo((Nodo)e3);
+        if(e4.toString()!=""){
+            tmp.addHijo((Nodo)e4); /*No terminal*/
+        }
+        if(e5.toString()!=""){
+            tmp.addHijo((Nodo)e5);
+        }
+        tmp.addHijo(new Nodo("END_IF",e6.toString(),contador++)) /*terminal*/;
+        RESULT=tmp;
+    :};
 
+
+/*SELECT CASE*/
+list_case::= LQUE NUMERO RQUE THEN lista_instrucciones list_case
+            | /*VACIO*/;
+
+select_case::= SELECT NUMERO CASE list_case DEFAULT lista_instrucciones END_SELECT;

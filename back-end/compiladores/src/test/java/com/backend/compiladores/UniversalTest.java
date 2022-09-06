@@ -65,10 +65,11 @@ public class UniversalTest {
 
             if(sym != null){
                 System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+                System.out.println(expected_tokens);
             }
 
             System.out.println(e);
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
 
 
