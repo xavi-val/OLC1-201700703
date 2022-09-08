@@ -69,7 +69,7 @@ public class UniversalTest {
             }
 
             System.out.println(e);
-            //throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
 

@@ -6,11 +6,12 @@ import com.backend.compiladores.services.ParserSym;
 %%
 %public
 %class Lexer
-%cup
+
 %line
 %column
 %caseless
 %ignorecase
+%cup
 
 digit = [0-9]
 letter = [a-zA-Z]
@@ -20,7 +21,7 @@ whitespace = [ \n\t\r]
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 
-TraditionalComment   = "/*" [^*] ~"*/" | "/*" "*"+ "/" /*Comentarios multilinea*/
+TraditionalComment   = "/*" ~"*/" | "/*" "*"+ "/" /*Comentarios multilinea*/
 // Comment can be the last line of the file, without line terminator.
 EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}? /*Comentarios de una linea*/
 comment = {TraditionalComment} | {EndOfLineComment}
@@ -39,7 +40,7 @@ suma =\+
 resta =\-
 multiplicacion =\*
 division =\/
-equal =\=
+
 
 //Operadores relacionales
 mayor=mayor
@@ -57,10 +58,12 @@ not=not
 
 //Sibolos de un solo caracter - Inicio
 asignacion =->
-coma =,
-semi_colon =bueno
+coma =\,
+scolon =\;
 Lpar =\(
 Rpar =\)
+Lcor =\[
+Rcor =\]
 Lque =\¿
 Rque =\?
 
@@ -90,7 +93,7 @@ end_select =fin_segun
 for =para
 to =hasta
 end_for =fin_para
-incremental =con incremental
+incremental =con_incremental
 while =mientras
 end_while =fin_mientras
 repetir =repetir
@@ -107,7 +110,7 @@ imprimir_sin_salto=imprimir_nl
 
 
 //Variables
-variable = \_{letter}({letter}|{digit})+\_
+variable = \_{letter}({letter}|{digit})*\_
 
 %{
 
@@ -159,11 +162,13 @@ variable = \_{letter}({letter}|{digit})+\_
 //Sibolos de un solo caracter - Inicio
 {asignacion} { return symbol(ParserSym.ASIGNACION, yytext()); } //O
 {coma} { return symbol(ParserSym.COMA, yytext()); }//O
-{semi_colon} { symbol(ParserSym.SEMI_COLON, yytext()); }
+{scolon} { return symbol(ParserSym.SEMI_COLON, yytext()); }
 {Lpar} { return symbol(ParserSym.LPAREN, yytext()); } //O
 {Rpar} { return symbol(ParserSym.RPAREN, yytext()); } //O
-{Lque} { symbol(ParserSym.LQUE, yytext()); } //0
-{Rque} { symbol(ParserSym.RQUE, yytext()); } //0
+{Lque} { return symbol(ParserSym.LQUE, yytext()); } //0
+{Rque} { return symbol(ParserSym.RQUE, yytext()); } //0
+{Lcor} { return symbol(ParserSym.LCOR, yytext()); } //0
+{Rcor} { return symbol(ParserSym.RCOR, yytext()); } //0
 
 
 //Palabras reservadas - Tipado
@@ -185,27 +190,27 @@ variable = \_{letter}({letter}|{digit})+\_
 {else_if} { return symbol(ParserSym.ELSE_IF, yytext()); }//O
 {then} { return symbol(ParserSym.THEN, yytext()); } //repetido en if, select case //O
 {end_if} { return symbol(ParserSym.END_IF, yytext()); } //O
-{select} { symbol(ParserSym.SELECT, yytext()); } //0
-{case} { symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras //0
-{default} { symbol(ParserSym.DEFAULT, yytext()); } //0
-{end_select} { symbol(ParserSym.END_SELECT, yytext()); } //0
-//{for} { symbol(ParserSym.FOR, yytext()); }
-//{to} { symbol(ParserSym.TO, yytext()); }
-//{end_for} { symbol(ParserSym.END_FOR, yytext()); }
-//{incremental} { symbol(ParserSym.INCREMENTAL, yytext()); }
-//{while} { symbol(ParserSym.WHILE, yytext()); }
-//{end_while} { symbol(ParserSym.END_WHILE, yytext()); }
-//{repetir} { symbol(ParserSym.REPETIR, yytext()); }
-//{hasta_que} { symbol(ParserSym.HASTA_QUE, yytext()); }
-//{return} { symbol(ParserSym.RETURN, yytext()); }
-//{metodo} { symbol(ParserSym.METODO, yytext()); }
-//{fin_metodo} { symbol(ParserSym.FIN_METODO, yytext()); }
-//{con_parametros} { symbol(ParserSym.CON_PARAMETROS, yytext()); }
-//{function} { symbol(ParserSym.FUNCTION, yytext()); }
-//{end_function} { symbol(ParserSym.NUMERO, yytext()); }
-//{ejecutar} { symbol(ParserSym.EJECUTAR, yytext()); }
-//{imprimir} { symbol(ParserSym.IMPRIMIR, yytext()); }
-//{imprimir_sin_salto} { symbol(ParserSym.IMPRIMIR_SIN_SALTO, yytext()); }
+{select} { return symbol(ParserSym.SELECT, yytext()); } //0
+{case} { return symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras //0
+{default} { return symbol(ParserSym.DEFAULT, yytext()); } //0
+{end_select} { return symbol(ParserSym.END_SELECT, yytext()); } //0
+{for} { return symbol(ParserSym.FOR, yytext()); } //0
+{to} { return symbol(ParserSym.TO, yytext()); } //0
+{end_for} { return symbol(ParserSym.END_FOR, yytext()); } //0
+{incremental} { return symbol(ParserSym.INCREMENTAL, yytext()); } //0
+{while} { return symbol(ParserSym.WHILE, yytext()); }//0
+{end_while} { return symbol(ParserSym.END_WHILE, yytext()); } //0
+{repetir} { return symbol(ParserSym.REPETIR, yytext()); } //0
+{hasta_que} { return symbol(ParserSym.HASTA_QUE, yytext()); } //0
+{return} { return symbol(ParserSym.RETURN, yytext()); }
+{metodo} { return symbol(ParserSym.METODO, yytext()); }
+{fin_metodo} { return symbol(ParserSym.FIN_METODO, yytext()); }
+{con_parametros} { return symbol(ParserSym.CON_PARAMETROS, yytext()); }
+{function} { return symbol(ParserSym.FUNCTION, yytext()); }
+{end_function} { return symbol(ParserSym.END_FUNCTION, yytext()); }
+{ejecutar} { return symbol(ParserSym.EJECUTAR, yytext()); }
+{imprimir} { return symbol(ParserSym.IMPRIMIR, yytext()); }
+{imprimir_sin_salto} { return symbol(ParserSym.IMPRIMIR_SIN_SALTO, yytext()); }
 
 
 //Variables
