@@ -161,7 +161,7 @@ MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT,
 /*Condicionales*/
 IF,THEN,END_IF, ELSE, ELSE_IF,
 /*SELECT -CASE*/
-SELECT,CASE,DEFAULT,END_SELECT,LQUE,RQUE,
+SELECT,CASE,END_SELECT,LQUE,RQUE,
 /*FOR*/
 FOR, TO, END_FOR, INCREMENTAL,
 /*WHILE*/
@@ -195,11 +195,11 @@ start with inicio;
 
 inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
         {:
-            Nodo tmp = new Nodo("Global");
+            Nodo tmp = new Nodo("Global","");
             tmp.setNumNodo(contador++);
-            tmp.addHijo(new Nodo("Nodo inicio",e1.toString(),contador++));
+            tmp.addHijo(new Nodo("inicio",e1.toString(),contador++));
             tmp.addHijo((Nodo) e2);
-            tmp.addHijo(new Nodo("Nodo final", e3.toString(),contador++));
+            tmp.addHijo(new Nodo("final", e3.toString(),contador++));
             ast.raiz = tmp;
             RESULT=tmp;
         :}
@@ -208,7 +208,7 @@ inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
 
 lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
                      {:
-                        Nodo tmp = new Nodo("instruccion");
+                        Nodo tmp = new Nodo("instruccion","");
                         tmp.setNumNodo(contador++);
                         tmp.addHijo((Nodo)e1);
                         tmp.addHijo((Nodo)e2);
@@ -274,7 +274,7 @@ lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = ats(new Object[]
 
 declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6 SEMI_COLON:e7
 {:
-    Nodo tmp = new Nodo("Declaracion");
+    Nodo tmp = new Nodo("Declaracion","");
     tmp.setNumNodo(contador++);
     tmp.addHijo(new Nodo("Ingresar",e1.toString(),contador++)) /*terminal*/;
     tmp.addHijo(new Nodo("Variables",e2.toString(),contador++)) /*terminal-indirecto*/;
@@ -289,11 +289,11 @@ declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 list
 /*Asignacion*/
 asignar ::= lista_variables:e1 ASIGNACION:e2 valor:e3 SEMI_COLON:e4
 {:
-    Nodo tmp = new Nodo("Asignacion");
+    Nodo tmp = new Nodo("Asignacion","");
     tmp.setNumNodo(contador++);
     tmp.addHijo(new Nodo("Variables",e1.toString(),contador++)) /*terminal-indirecto*/;
     tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
-    tmp.addHijo(new Nodo("Valor",e3.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo("Valores",e3.toString(),contador++)) /*terminal-indirecto*/;
     tmp.addHijo(new Nodo(";",e4.toString(),contador++)) /*terminal*/;
     RESULT=tmp;
 :} ;
@@ -350,6 +350,7 @@ else ::= ELSE:e1 lista_instrucciones:e2
             Nodo tmp = new Nodo("ELSE",e1.toString(),contador++);
             tmp.setNumNodo(contador++);
             tmp.addHijo((Nodo)e2);
+            RESULT=tmp;
         :}
        | {:RESULT="";:} /*Vacio*/;
 
@@ -385,12 +386,12 @@ list_case::= LQUE:e1 expr:e2 RQUE:e3 THEN:e4 lista_instrucciones:e5 list_case:e6
             :}
            | {:RESULT="";:}; /*Vacio*/
 
-default::=  DEFAULT:e1 lista_instrucciones:e2
+default::=  ELSE:e1 THEN:e2 lista_instrucciones:e3
             {:
-                Nodo tmp = new Nodo("default",e1.toString(),contador++);
+                Nodo tmp = new Nodo("default",ats(new Object[] {e1,e2}),contador++);
                 tmp.setNumNodo(contador++);
-                if(e2 != null && e2.toString()!=""){
-                    tmp.addHijo((Nodo)e2);
+                if(e3 != null && e3.toString()!=""){
+                    tmp.addHijo((Nodo)e3);
                 }
                 RESULT=tmp;
             :}

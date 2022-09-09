@@ -9,10 +9,9 @@ TO-DOS
 5. retorno - DONE
 6. metodo - DONE
 7. funciones - DONE
-8. llamada a funciones - 
-9. impresion
+8. llamada a funciones - Done
+9. impresion - Done
 
--------------Traduccion---------------
+-------------Traduccion a Python---------------
 
 
-*/

@@ -57,7 +57,7 @@ public class UniversalTest {
         try {
             parser.parse();
             parser.ast.graficar();
-            //p.traductor.generate_file("Test_file.txt");
+//            parser.traductor.generate_file("Test_file.txt");
         } catch (Exception e) {
 
             Symbol sym = parser.s;
@@ -76,10 +76,55 @@ public class UniversalTest {
     }
 
     @Test
-    public void testTraductorPython(){
+    public void testCaracteristicaTraductorPython(){
 
         Traductor_Python traductor_python = new Traductor_Python();
-        System.out.println(traductor_python.character("${85}"));
+        String[] entradas = {
+                "(_variable1_ es_igual 5*5+8/2)",
+                "'${100}'",
+                "1+(1)",
+                "30 potencia [22.2-2.2] + (2)",
+                "(5*8) mod (1+5+6)"
+        };
+        for (String entrada:entradas) {
+            System.out.println(traductor_python.traducir_valor(entrada));
+        }
+
+
+    }
+
+    @Test
+    public void testTraductorPython(){
+
+        Lexer lexerHandler;
+        try {
+            lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        Parser parser = new Parser(lexerHandler);
+        Traductor_Python TP = new Traductor_Python();
+
+        try {
+            parser.parse();
+            parser.ast.graficar();
+            TP.traducir(parser.ast.raiz);
+            TP.generate_file("Traduction_Python.txt");
+
+        } catch (Exception e) {
+
+            Symbol sym = parser.s;
+            LinkedList<String> expected_tokens = parser.getExpectedTokens();
+
+            if(sym != null){
+                System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+                System.out.println(expected_tokens);
+            }
+
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
 
     }
 

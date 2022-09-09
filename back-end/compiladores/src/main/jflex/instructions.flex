@@ -82,13 +82,12 @@ ingresar =ingresar
 como =como
 con_valor =con_valor
 if=si
-else =de_lo_contrario
+else =de_lo_contrario //REPETIDO EN EL ELSE Y EL DEFAULT DE SELECT CASE
 else_if =o_si
 then =entonces //repetido en if, select case
 end_if =fin_si
 select =segun
 case =hacer //repetido en for , select case, mientras
-default =de_lo_contrario_entonces
 end_select =fin_segun
 for =para
 to =hasta
@@ -192,7 +191,6 @@ variable = \_{letter}({letter}|{digit})*\_
 {end_if} { return symbol(ParserSym.END_IF, yytext()); } //O
 {select} { return symbol(ParserSym.SELECT, yytext()); } //0
 {case} { return symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras //0
-{default} { return symbol(ParserSym.DEFAULT, yytext()); } //0
 {end_select} { return symbol(ParserSym.END_SELECT, yytext()); } //0
 {for} { return symbol(ParserSym.FOR, yytext()); } //0
 {to} { return symbol(ParserSym.TO, yytext()); } //0

@@ -1,9 +1,8 @@
 package com.backend.compiladores.services.traductor;
 
+import com.backend.compiladores.services.parserPackage.Nodo;
 import java_cup.runtime.ScannerBuffer;
-
 import java.io.*;
-
 
 public abstract class Traductor {
 
@@ -31,14 +30,32 @@ public abstract class Traductor {
 
     }
 
+    public abstract void traducir(Nodo nodo);
+
+    public abstract void inicio();
 
     public abstract void comentario(String comentario);
-    public abstract void inicio(String inicio);
 
-    public abstract String booleano(String booleano);
 
-    public abstract String character(String character);
+    public abstract String traducir_booleano(String booleano);
 
-    public abstract void declaracion_asignacion(String decl_asig);
+    public abstract String traducir_character(String character);
 
+    public abstract void traducir_declaracion(Nodo decl_asig);
+
+    public abstract String traducir_valor(String valor);
+
+    public abstract void traducir_asignacion(Nodo decl_asig);
+
+    public abstract void traducir_if(Nodo nodo);
+
+    public abstract void traducir_else_if(Nodo nodo);
+
+    public abstract void traducir_else(Nodo nodo);
+
+    public abstract void traducir_select(Nodo nodo);
+
+    public abstract void traducir_case(Nodo nodo, String variable);
+
+    public abstract void imprimir(Nodo nodo);
 }
