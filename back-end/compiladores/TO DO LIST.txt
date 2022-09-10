@@ -14,4 +14,18 @@ TO-DOS
 
 -------------Traduccion a Python---------------
 
+TO-DOS
 
+INICIO			- DONE
+COMENTARIO		- DONE
+DECLARACION		- DONE
+ASIGNACION		- DONE
+IF				- DONE
+SELECT			- DONE
+FOR				- DONE
+WHILE 			- DONE
+REPETIR 		- DONE
+METODO			- DONE
+FUNCION  		- DONE
+EJECUTAR 		- DONE
+IMPRIMIR	- DONE

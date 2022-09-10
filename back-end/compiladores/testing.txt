@@ -1,18 +1,13 @@
 inicio
 
-_varaux_ -> 5;
+metodo _metodo1_
+	imprimir_nl "estamos entrando al metodo 1";	
+	ejecutar _potenciaManual_(3*1+4/2, 3+2);
+	imprimir ejecutar _potenciaFuncion_(3*1+4/2, 3+2);
+	imprimir_nl " Esta es la potencia Funcion";
+fin_metodo
 
-segun _varaux_ hacer
-	¿0? entonces
-		imprimir_nl "el valor es 0";
-	¿1? entonces
-		imprimir_nl "el valor es 1";
-	¿2? entonces
-		imprimir_nl "el valor es 2";
-	¿3? entonces
-		imprimir_nl "el valor es 3";
-	de_lo_contrario entonces
-		imprimir_nl "Sos la mera verga";
-fin_segun
+ejecutar _metodo1_();
+
 
 fin

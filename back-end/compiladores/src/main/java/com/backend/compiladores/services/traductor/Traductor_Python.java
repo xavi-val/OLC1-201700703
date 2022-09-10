@@ -42,17 +42,17 @@ public class Traductor_Python extends Traductor {
                 } else if (hijo.getNombre()=="SELECT") {
                     traducir_select(hijo);
                 } else if (hijo.getNombre()=="FOR") {
-                    traducir(hijo);
+                    traducir_for(hijo);
                 } else if (hijo.getNombre()=="WHILE") {
-                    traducir(hijo);
+                    traducir_while(hijo);
                 } else if (hijo.getNombre()=="REPETIR") {
-                    traducir(hijo);
+                    traducir_do_while(hijo);
                 } else if (hijo.getNombre()=="METODO") {
-                    traducir(hijo);
+                    traducir_metodo(hijo);
                 } else if (hijo.getNombre()=="FUNCION") {
-                    traducir(hijo);
+                    traducir_funcion(hijo);
                 } else if (hijo.getNombre()=="EJECUTAR") {
-
+                    traducir_llamadas(hijo);
                 } else if (hijo.getNombre() == "IMPRIMIR") {
                     imprimir(hijo);
                 }
@@ -76,6 +76,7 @@ public class Traductor_Python extends Traductor {
         this.final_traduction += "\n";
         this.final_traduction += tabular(texto);
     }
+
 
 
     @Override
@@ -303,7 +304,6 @@ public class Traductor_Python extends Traductor {
 
     }
 
-
     @Override
     public void traducir_if(Nodo nodo){
         String aux ="if ";
@@ -409,7 +409,210 @@ public class Traductor_Python extends Traductor {
                 traducir_case(hijo,variable);
             }else if (hijo.getNombre()=="instruccion"){
                 traducir(hijo);
+            }
+        }
+    };
+
+    @Override
+    public void traducir_for(Nodo nodo){
+
+        Boolean hayIncremental=false;
+        String aux="for ";
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "Incremental") {
+                hayIncremental=true;
+            }
+        }
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre()=="<Variable>"){
+                aux += hijo.getValor() + " in range (" ;
+            } else if (hijo.getNombre()=="<Valor inicial>") {
+                aux+=traducir_valor(hijo.getValor()) + ",";
+            } else if (hijo.getNombre()=="<Valor final>") {
+                if (hayIncremental){
+                    aux+=traducir_valor(hijo.getValor()) + ",";
+                }else{
+                    aux+=traducir_valor(hijo.getValor()) + "):";
+                    encolar(aux);
+                    this.tabulacion+=1;
+                }
+            } else if (hijo.getNombre()=="Incremental") {
+                aux+=traducir_valor(hijo.getValor()) + "):";
+                encolar(aux);
+                this.tabulacion+=1;
+            } else if (hijo.getNombre()=="instruccion") {
+                traducir(hijo);
+            } else if (hijo.getNombre()=="<END_FOR>") {
                 this.tabulacion-=1;
+            }
+        }
+    };
+    @Override
+    public void traducir_while(Nodo nodo){
+        String aux="while ";
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "<condicion>") {
+                aux+=traducir_valor(hijo.getValor()) +":";
+                encolar(aux);
+                this.tabulacion+=1;
+            } else if (hijo.getNombre() == "instruccion") {
+                traducir(hijo);
+            } else if (hijo.getNombre() == "END_WHILE") {
+                this.tabulacion-=1;
+            }
+        }
+    };
+
+    @Override
+    public void traducir_do_while(Nodo nodo){
+        String aux="";
+        encolar("while True:");
+        this.tabulacion+=1;
+
+        for (Nodo hijo: nodo.getHijos()) {
+             if (hijo.getNombre() == "instruccion") {
+                traducir(hijo);
+            } else if (hijo.getNombre() == "<condicion>") {
+                 aux += "if " + traducir_valor(hijo.getValor()) + ":";
+                 encolar(aux);
+                 this.tabulacion+=1;
+                 encolar("break");
+                 this.tabulacion-=2;
+            }
+        }
+    };
+
+    @Override
+    public void traducir_metodo(Nodo nodo){
+        String aux="def ";
+        Boolean hayParametros=false;
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "parametros") {
+                hayParametros=true;
+            }
+        }
+
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "Nombre") {
+                if (!hayParametros){
+                    aux+= hijo.getValor() + "():";
+                    encolar(aux);
+                    this.tabulacion+=1;
+                }else{
+                    aux+= hijo.getValor() + "(";
+                }
+            } else if (hijo.getNombre() == "parametros") {
+                aux+=getVariablesParametros(hijo.getValor()) + "):";
+                encolar(aux);
+                this.tabulacion+=1;
+            } else if (hijo.getNombre() == "instruccion") {
+                traducir(hijo);
+            } else if (hijo.getNombre() == "FIN_METODO") {
+                this.tabulacion-=1;
+            }
+        }
+    };
+
+    public String getVariablesParametros(String valor) {
+        Reader stringReader = new StringReader(valor);
+        Lexer lexerHandler = new Lexer(stringReader);
+        String respuesta="";
+
+        while (!lexerHandler.yyatEOF()){
+            Symbol aux = null;
+            try {
+                aux = lexerHandler.next_token();
+                String nombre = ParserSym.terminalNames[aux.sym];
+                String valor_token = aux.value.toString();
+
+                if (nombre=="VARIABLE"){
+                    respuesta+=valor_token;
+                } else if (nombre=="COMA") {
+                    respuesta+=valor_token;
+                }
+
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        return respuesta;
+    }
+    @Override
+    public void traducir_funcion(Nodo nodo){
+        String aux="def ";
+        Boolean hayParametros=false;
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "parametros") {
+                if (hijo.getValor()!="()"){
+                    hayParametros=true;
+                }
+            }
+        }
+
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "Nombre") {
+                if (!hayParametros){
+                    aux+= hijo.getValor() + "():";
+                    encolar(aux);
+                    this.tabulacion+=1;
+                }else{
+                    aux+= hijo.getValor() + "(";
+                }
+            } else if (hijo.getNombre() == "parametros") {
+                if(hayParametros){
+                    aux+=getVariablesParametros(hijo.getValor()) + "):";
+                    encolar(aux);
+                }
+            } else if (hijo.getNombre() == "instruccion") {
+                traducir(hijo);
+            } else if (hijo.getNombre() == "RETURN") {
+                String retorno = "return " +traducir_valor(hijo.getValor().replaceAll(";",""));
+                encolar(retorno);
+            } else if (hijo.getNombre() == "FIN_FUNCION") {
+                this.tabulacion-=1;
+            }
+        }
+    };
+    @Override
+    public void traducir_llamadas(Nodo nodo){
+        String aux="";
+        Boolean hayParametros=false;
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "parametros") {
+                hayParametros=true;
+            }
+        }
+
+        for (Nodo hijo: nodo.getHijos()) {
+            if (hijo.getNombre() == "Nombre") {
+                if (!hayParametros){
+                    aux+= hijo.getValor() + "()";
+                    encolar(aux);
+                }else{
+                    aux+= hijo.getValor() + "(";
+                }
+            } else if (hijo.getNombre() == "parametros") {
+
+                if(hayParametros){
+                    String[] parametros =hijo.getValor().replaceAll("\\(","").replaceAll("\\)","").split(",");
+
+                    for(String parametro:parametros){
+                        aux += traducir_valor(parametro);
+                    }
+                    aux+= ")";
+                    encolar(aux);
+                }
             }
         }
     };
@@ -420,11 +623,15 @@ public class Traductor_Python extends Traductor {
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="Valor"){
                 aux += traducir_valor(hijo.getValor()) + ")";
+                encolar(aux);
+            } else if (hijo.getNombre()=="EJECUTAR") {
+                encolar(aux);
+                traducir_llamadas(hijo);
             }
 
         }
 
-        encolar(aux);
+
     }
 
 }

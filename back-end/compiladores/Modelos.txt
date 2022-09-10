@@ -144,7 +144,7 @@ fin_si
 
 /*Ahora empezamos con las funciones y procedimientos*/
 
-metodo _potenciaManual_ con_parametros (_base_ Numero, _exponenete_ Numero)
+metodo _potenciaManual_ con_parametros (_base_ Numero, _exponente_ Numero)
 	ingresar _i_ como Numero con_valor 0;
 	ingresar _acumulado_ como Numero con_valor 0;
 	para _i_->0 hasta _exponente_-1 hacer

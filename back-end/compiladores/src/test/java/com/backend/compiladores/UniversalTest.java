@@ -80,14 +80,10 @@ public class UniversalTest {
 
         Traductor_Python traductor_python = new Traductor_Python();
         String[] entradas = {
-                "(_variable1_ es_igual 5*5+8/2)",
-                "'${100}'",
-                "1+(1)",
-                "30 potencia [22.2-2.2] + (2)",
-                "(5*8) mod (1+5+6)"
+                "(_base_ Numero, _exponenete_ Numero)"
         };
         for (String entrada:entradas) {
-            System.out.println(traductor_python.traducir_valor(entrada));
+            //System.out.println(traductor_python.getVariablesParametros(entrada));
         }
 
 
@@ -110,7 +106,7 @@ public class UniversalTest {
             parser.parse();
             parser.ast.graficar();
             TP.traducir(parser.ast.raiz);
-            TP.generate_file("Traduction_Python.txt");
+            TP.generate_file("Traduction_Python.py");
 
         } catch (Exception e) {
 

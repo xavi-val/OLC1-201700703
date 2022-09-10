@@ -57,5 +57,17 @@ public abstract class Traductor {
 
     public abstract void traducir_case(Nodo nodo, String variable);
 
+    public abstract void traducir_for(Nodo nodo);
+
+    public abstract void traducir_while(Nodo nodo);
+
+    public abstract void traducir_do_while(Nodo nodo);
+
+    public abstract void traducir_metodo(Nodo nodo);
+
+    public abstract void traducir_funcion(Nodo nodo);
+
+    public abstract void traducir_llamadas(Nodo nodo);
+
     public abstract void imprimir(Nodo nodo);
 }
