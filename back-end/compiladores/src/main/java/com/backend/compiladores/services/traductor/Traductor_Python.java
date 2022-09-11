@@ -53,7 +53,7 @@ public class Traductor_Python extends Traductor {
                     traducir_funcion(hijo);
                 } else if (hijo.getNombre()=="EJECUTAR") {
                     traducir_llamadas(hijo,true);
-                } else if (hijo.getNombre() == "IMPRIMIR") {
+                } else if (hijo.getNombre() == "IMPRIMIR" || hijo.getNombre() == "IMPRIMIR_SS") {
                     imprimir(hijo);
                 }
             }
@@ -208,7 +208,7 @@ public class Traductor_Python extends Traductor {
                 }else if (nombre=="AND") {
                     respuesta += "and";
                 }else if (nombre=="NOT") {
-                    respuesta += "not";
+                    respuesta += "not ";
                 }else if (nombre=="BOOLEAN") {
                     respuesta += traducir_booleano(valor_token);
                 }
@@ -369,9 +369,9 @@ public class Traductor_Python extends Traductor {
                 aux += valor + " == ";
 
             }else if (hijo.getNombre()=="case") {
-                aux += hijo.getValor().replaceAll("\\¿","")
-                        .replaceAll("\\?","")
-                        .replaceAll("(?i)entonces","") + " : ";
+                aux += traducir_valor(hijo.getValor().replaceAll("\\¿","")
+                                        .replaceAll("\\?","")
+                                        .replaceAll("(?i)entonces","")) + " : ";
                 encolar(aux);
                 this.tabulacion+=1;
                 for (Nodo nieto : hijo.getHijos()) {
@@ -398,9 +398,9 @@ public class Traductor_Python extends Traductor {
 
     @Override
     public void traducir_case(Nodo nodo, String variable){
-        String aux ="elif " + variable + " == " +   nodo.getValor().replaceAll("\\¿","")
+        String aux ="elif " + variable + " == " +   traducir_valor(nodo.getValor().replaceAll("\\¿","")
                                                                     .replaceAll("\\?","")
-                                                                    .replaceAll("(?i)entonces","") + " : ";
+                                                                    .replaceAll("(?i)entonces","")) + " : ";
         encolar(aux);
         this.tabulacion+=1;
 
@@ -609,8 +609,13 @@ public class Traductor_Python extends Traductor {
                     String[] parametros =hijo.getValor().replaceAll("\\(","").replaceAll("\\)","").split(",");
 
                     for(String parametro:parametros){
-                        aux += traducir_valor(parametro);
+                        if (parametro != parametros[parametros.length-1]){
+                            aux += traducir_valor(parametro) + ",";
+                        }else{
+                            aux += traducir_valor(parametro);
+                        }
                     }
+
                     aux+= ")";
                     if (salto_de_linea){
                         encolar(aux);
@@ -636,7 +641,6 @@ public class Traductor_Python extends Traductor {
                 aux += traducir_llamadas(hijo,false) + ")";
                 encolar(aux);
             }
-
         }
 
 

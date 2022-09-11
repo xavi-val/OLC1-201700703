@@ -189,7 +189,7 @@ precedence left POTENCIA;
 /*Precedencia de operadores relacionales y logicos*/
 precedence left MAYOR , MENOR , MAYORIGUAL , MENORIGUAL , IGUAL , DIFERENTE;
 precedence left OR,AND;
-
+precedence left NOT;
 
 start with inicio;
 
@@ -317,13 +317,13 @@ op_logico ::= OR:e1 {:RESULT = ats(new Object[] {e1}) ;:}
             |AND:e1 {:RESULT = ats(new Object[] {e1}) ;:};
 
 condicion ::=
-             expr:e1 op_relacional:e2 expr:e3
+             valor:e1 op_relacional:e2 valor:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | valor:e1 op_logico:e2 valor:e3
             {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
             | LPAREN:e1 condicion:e2 RPAREN:e3
             {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-            | condicion:e1 op_logico:e2 condicion:e3
-            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
-            | NOT:e1 condicion:e2
+            | NOT:e1 valor:e2
             {:RESULT = ats(new Object[] {e1,e2}) ;:}
             | BOOLEAN:e1
             {:RESULT = ats(new Object[] {e1}) ;:};
@@ -415,7 +415,7 @@ select_case::= SELECT:e1 expr:e2 CASE:e3 list_case:e4 default:e5 END_SELECT:e6
 
 incremental::= INCREMENTAL:e1 expr:e2
             {:
-                RESULT= ats(new Object[] {e1,e2});
+                RESULT= ats(new Object[] {e2});
             :}
             | {:RESULT="";:} /*Vacio*/;
 
@@ -457,7 +457,7 @@ repetir ::= REPETIR:e1 lista_instrucciones:e2 HASTA_QUE:e3 valor:e4
             :};
 
 retorno ::= RETURN:e1 valor:e2 SEMI_COLON:e3
-        {: RESULT= ats(new Object[] {e1,e2,e3}); :};
+        {: RESULT= ats(new Object[] {e2}); :};
 
 lista_parametros_con_tipo ::=  VARIABLE:e1 TIPO:e2 COMA:e3 lista_parametros_con_tipo:e4
                       {: RESULT= ats(new Object[] {e1,e2,e3,e4}); :}
@@ -516,11 +516,11 @@ imprimir ::= IMPRIMIR:e1 valor:e2 SEMI_COLON:e3
               tmp.addHijo((Nodo) e2) /*no terminal*/;
               RESULT=tmp;:}
             | IMPRIMIR_SIN_SALTO:e1 valor:e2 SEMI_COLON:e3
-            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+            {:Nodo tmp = new Nodo("IMPRIMIR_SS",e1.toString(),contador++);
               tmp.addHijo(new Nodo("Valor",e2.toString(),contador++)) /*terminal*/;
               tmp.addHijo(new Nodo(";",e3.toString(),contador++)) /*terminal*/;
               RESULT=tmp;:}
             | IMPRIMIR_SIN_SALTO:e1 ejecutar:e2
-            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+            {:Nodo tmp = new Nodo("IMPRIMIR_SS",e1.toString(),contador++);
               tmp.addHijo((Nodo) e2) /*no terminal*/;
               RESULT=tmp;:};

@@ -3,6 +3,8 @@ package com.backend.compiladores;
 import com.backend.compiladores.services.Lexer;
 import com.backend.compiladores.services.Parser;
 import com.backend.compiladores.services.ParserSym;
+import com.backend.compiladores.services.helper.golang_helperSym;
+import com.backend.compiladores.services.helper.golang_helper_lexer;
 import com.backend.compiladores.services.traductor.Traductor_Go;
 import com.backend.compiladores.services.traductor.Traductor_Python;
 import java_cup.runtime.Symbol;
@@ -127,14 +129,52 @@ public class UniversalTest {
 
 
     @Test
+    public void seeTokensGo() throws FileNotFoundException {
+
+
+        String[] entradas = {
+                "(_variable1_ es_igual 5*5+8/2)",
+                "'${100}'",
+                "1+(1)",
+                "30 potencia [22.2-2.2] + (2)",
+                "(5*8) mod (1+5+6)"
+        };
+
+//        golang_helper_lexer lexerHandler = new golang_helper_lexer(new BufferedReader(new FileReader(file)));
+
+        for (String entrada:entradas) {
+            golang_helper_lexer lexerHandler = new golang_helper_lexer(new StringReader(entrada));
+
+            while (!lexerHandler.yyatEOF()){
+                try {
+
+                    Symbol aux = lexerHandler.next_token();
+
+                    String nombre = golang_helperSym.terminalNames[aux.sym];
+                    System.out.println( nombre + " -- " + aux.value);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        }
+
+    }
+
+
+    @Test
     public void testCaracteristicaTraductorGo(){
 
         Traductor_Go traductor_go = new Traductor_Go();
         String[] entradas = {
-                "(_base_ Numero, _exponenete_ Numero)"
+                "(_variable1_ es_igual 5*5+8/2)",
+                "'${100}'",
+                "1+(1)",
+                "30 potencia [22.2-2.2] + (2)",
+                "(5*8) mod (1+5+6)"
         };
         for (String entrada:entradas) {
-            System.out.println(traductor_go.getVariablesParametros(entrada));
+            System.out.println(traductor_go.traducir_valor(entrada));
         }
 
 

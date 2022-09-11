@@ -68,10 +68,10 @@ Lque =\¿
 Rque =\?
 
 //Palabras reservadas - TIPADO
-tipado_numero = numero|número|Número|Numero|NUMERO|NÚMERO
-tipado_cadena = cadena|Cadena|CADENA
-tipado_boolean = boolean|Boolean|BOOLEAN
-tipado_caracter = caracter|carácter|Caracter|Carácter|CARACTER|CARÁCTER
+tipado_numero = numero|número
+tipado_cadena = cadena
+tipado_boolean = boolean
+tipado_caracter = caracter|carácter
 
 //Palabras reservadas - Inicio
 potencia =potencia

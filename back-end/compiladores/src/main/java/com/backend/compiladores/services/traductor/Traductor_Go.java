@@ -2,12 +2,17 @@ package com.backend.compiladores.services.traductor;
 
 import com.backend.compiladores.services.Lexer;
 import com.backend.compiladores.services.ParserSym;
+import com.backend.compiladores.services.helper.golang_helper_lexer;
 import com.backend.compiladores.services.parserPackage.Nodo;
 import java_cup.runtime.Symbol;
+
+//Ayuda para traducir a golang con un parser
+import com.backend.compiladores.services.helper.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +36,8 @@ public class Traductor_Go extends Traductor {
                 } else if (hijo.getNombre()=="inicio") {
                     inicio();
                 } else if (hijo.getNombre()=="final") {
+                    this.tabulacion-=1;
+                    agregarEncabezado();
                     encolar("}");
                 } else if (hijo.getNombre()=="comentario") {
                     comentario(hijo.getValor());
@@ -54,7 +61,7 @@ public class Traductor_Go extends Traductor {
                     traducir_funcion(hijo);
                 } else if (hijo.getNombre()=="EJECUTAR") {
                     traducir_llamadas(hijo,true);
-                } else if (hijo.getNombre() == "IMPRIMIR") {
+                } else if (hijo.getNombre() == "IMPRIMIR" || hijo.getNombre() == "IMPRIMIR_SS") {
                     imprimir(hijo);
                 }
             }
@@ -77,6 +84,15 @@ public class Traductor_Go extends Traductor {
     public void encolar(String texto){
         this.final_traduction += "\n";
         this.final_traduction += tabular(texto);
+    }
+
+    public void agregarEncabezado(){
+        String aux = "package main \nimport(";
+        for (String libreria:this.cabecera) {
+            aux += "\n\t\"" + libreria + "\"";
+        }
+        aux+="\n)\n\n";
+        this.final_traduction = aux + final_traduction;
     }
 
     @Override
@@ -117,16 +133,52 @@ public class Traductor_Go extends Traductor {
 
     }
 
+
+    public String obtenerTipado(String valor){
+        String tipo="";
+
+
+        if(valor.matches("-?[0-9]+(\\.)?[0-9]+")){
+            tipo = " float64 ";
+        }else if(valor.matches("-?[0-9]+")){
+            tipo = " int ";
+        } else if (valor.matches("\\\"([^\\\"])*\\\"")) {
+            tipo = " string ";
+        } else if (valor.toLowerCase().matches("(verdadero|falso)")) {
+            tipo = " bool ";
+        } else if (valor.matches("(\\'.\\' | \\'\\$\\{[0-9]+\\}\\')")) {
+            tipo = "string";
+        }
+
+
+        return tipo;
+    }
+
     @Override
     public void traducir_declaracion(Nodo decl_asig) {
         String[] variables={};
         String[] valores={};
-        String aux="";
+        String aux="var ";
+        String tipo="";
 
         for (Nodo hijo : decl_asig.getHijos()) {
             if (hijo.getNombre()=="Variables"){
                 variables = hijo.getValor().split(",");
-                aux = hijo.getValor();
+                aux += hijo.getValor();
+            } else if (hijo.getNombre()=="TIPO") {
+
+
+
+                for (Nodo hijo2 : decl_asig.getHijos()) {
+                    if (hijo2.getNombre() == "Valores") {
+                        valores = hijo2.getValor().split(",");
+                        tipo = obtenerTipado(valores[0]);
+                    }
+                }
+
+
+                aux+=tipo;
+
             } else if (hijo.getNombre()=="Valores") {
                 valores = hijo.getValor().split(",");
                 //Traducimos los valores
@@ -166,14 +218,37 @@ public class Traductor_Go extends Traductor {
     @Override
     public String traducir_valor(String valor) {
 
+        if(valor==""){
+            return "";
+        } else if (valor.toLowerCase().contains("potencia")) {
+            //TRADUCIMOS POR SI VIENE POTENCIA
+            golang_helper gh = new golang_helper(new golang_helper_lexer(new StringReader(valor)));
+            try {
+                gh.parse();
+                valor = gh.valor;
+            } catch (Exception e) {
+                Symbol sym = gh.s;
+                LinkedList<String> expected_tokens = gh.getExpectedTokens();
+
+                if(sym != null){
+                    System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+                    System.out.println(expected_tokens);
+                    System.out.println("SOY EL HELPER DE GOLANG");
+                }
+
+                System.out.println(e);
+                throw new RuntimeException(e);
+            }
+        }
+
         Reader stringReader = new StringReader(valor);
-        Lexer lexerHandler = new Lexer(stringReader);
+        golang_helper_lexer lexerHandler = new golang_helper_lexer(stringReader);
         String respuesta="";
 
         while (!lexerHandler.yyatEOF()){
             try {
                 Symbol aux = lexerHandler.next_token();
-                String nombre = ParserSym.terminalNames[aux.sym];
+                String nombre = golang_helperSym.terminalNames[aux.sym];
                 String valor_token = aux.value.toString();
 
                 /*Valores no traducidos*/
@@ -226,7 +301,12 @@ public class Traductor_Go extends Traductor {
                 }else if (nombre=="MODULO") {
                     respuesta += "%";
                 }else if (nombre=="POTENCIA") {
-                    //PENDIENTE
+                    respuesta += valor_token;
+                    if (!this.cabecera.contains("math")){
+                        this.cabecera.add("math");
+                    }
+                }else if (nombre=="FLOAT") {
+                    respuesta += valor_token;
                 }else if (nombre=="NUMERO") {
                     respuesta += valor_token;
                 }else if (nombre=="VARIABLE") {
@@ -242,6 +322,8 @@ public class Traductor_Go extends Traductor {
                     respuesta += "(";
                 }else if (nombre=="RCOR") {
                     respuesta += ")";
+                }else if (nombre=="COMA") {
+                    respuesta += valor_token;
                 }
 
             } catch (IOException e) {
@@ -263,7 +345,6 @@ public class Traductor_Go extends Traductor {
         for (Nodo hijo : decl_asig.getHijos()) {
             if (hijo.getNombre()=="Variables"){
                 variables = hijo.getValor().split(",");
-                aux = hijo.getValor();
             } else if (hijo.getNombre()=="Valores") {
                 valores = hijo.getValor().split(",");
                 //Traducimos los valores
@@ -271,32 +352,13 @@ public class Traductor_Go extends Traductor {
                     valores[i] = traducir_valor(valores[i]);
                 }
 
-
-                if(variables.length == 1 &&  valores.length==1){
-                    aux += " = " + valores[0];
-                }else if ( variables.length > 1 && valores.length>1) {
-                    aux += " = ";
-                    for (int i = 0; i < valores.length; i++) {
-                        if (i+1==valores.length){
-                            aux += valores[i];
-                        }else{
-                            aux += valores[i] + ",";
-                        }
-                    }
-                } else if ( variables.length > 1 && valores.length==1) {
-                    aux += " = ";
-                    for (int i = 0; i < variables.length; i++) {
-                        if (i+1==variables.length){
-                            aux += valores[0];
-                        }else{
-                            aux += valores[0] + ",";
-                        }
-                    }
+                for (int i = 0; i < variables.length; i++) {
+                    aux = variables[i] + " = " + valores[0];
+                    encolar(aux);
                 }
             }
         }
 
-        encolar(aux);
 
     }
 
@@ -305,11 +367,14 @@ public class Traductor_Go extends Traductor {
         String aux ="if ";
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="condicion"){
-                aux += traducir_valor(hijo.getValor()) + " : ";
+                aux += traducir_valor(hijo.getValor()) + " { ";
                 encolar(aux);
                 this.tabulacion+=1;
             }else if (hijo.getNombre()=="instruccion") {
                 traducir(hijo);
+                this.tabulacion-=1;
+                encolar("}");
+                this.tabulacion+=1;
             }else if (hijo.getNombre()=="ELSE_IF") {
                 this.tabulacion-=1;
                 traducir_else_if(hijo);
@@ -326,17 +391,20 @@ public class Traductor_Go extends Traductor {
 
     @Override
     public void traducir_else_if(Nodo nodo){
-        String aux ="elif ";
+        String aux =" else if ";
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="condicion"){
-                aux += traducir_valor(hijo.getValor()) + " : ";
-                encolar(aux);
+                aux += traducir_valor(hijo.getValor()) + " { ";
+                this.final_traduction += aux;
                 this.tabulacion+=1;
             }else if (hijo.getNombre()=="ELSE_IF") {
                 this.tabulacion-=1;
                 traducir_else_if(hijo);
             }else if (hijo.getNombre()=="instruccion") {
                 traducir(hijo);
+                this.tabulacion-=1;
+                encolar("}");
+                this.tabulacion+=1;
             }
         }
 
@@ -344,30 +412,34 @@ public class Traductor_Go extends Traductor {
 
     @Override
     public void traducir_else(Nodo nodo){
-        String aux ="else :";
+        String aux =" else {";
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="instruccion") {
-                encolar(aux);
+                this.final_traduction += aux;
                 this.tabulacion+=1;
                 traducir(hijo);
             }
         }
-
+        this.tabulacion-=1;
+        encolar("}");
+        this.tabulacion+=1;
     };
 
     @Override
     public void traducir_select(Nodo nodo){
-        String aux ="if ";
+        String aux ="switch ";
         String valor="";
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="<Valor>"){
                 valor = traducir_valor(hijo.getValor());
-                aux += valor + " == ";
+                aux += valor+"{";
+                encolar(aux);
+                this.tabulacion+=1;
 
             }else if (hijo.getNombre()=="case") {
-                aux += hijo.getValor().replaceAll("\\¿","")
-                        .replaceAll("\\?","")
-                        .replaceAll("(?i)entonces","") + " : ";
+                aux = "case " + traducir_valor(hijo.getValor().replaceAll("\\¿","")
+                                                .replaceAll("\\?","")
+                                                .replaceAll("(?i)entonces","")) + " : ";
                 encolar(aux);
                 this.tabulacion+=1;
                 for (Nodo nieto : hijo.getHijos()) {
@@ -379,7 +451,7 @@ public class Traductor_Go extends Traductor {
                     }
                 }
             } else if (hijo.getNombre()=="default") {
-                encolar("else: ");
+                encolar("default: ");
                 this.tabulacion+=1;
                 if (hijo.getHijos().size()!=0){
                     traducir(hijo.getHijos().get(0));
@@ -387,6 +459,7 @@ public class Traductor_Go extends Traductor {
                 this.tabulacion-=1;
             }else if (hijo.getNombre()=="END_SELECT") {
                 this.tabulacion-=1;
+                encolar("}");
             }
 
         }
@@ -394,9 +467,9 @@ public class Traductor_Go extends Traductor {
 
     @Override
     public void traducir_case(Nodo nodo, String variable){
-        String aux ="elif " + variable + " == " +   nodo.getValor().replaceAll("\\¿","")
+        String aux ="case " + traducir_valor(nodo.getValor().replaceAll("\\¿","")
                 .replaceAll("\\?","")
-                .replaceAll("(?i)entonces","") + " : ";
+                .replaceAll("(?i)entonces","")) + " : ";
         encolar(aux);
         this.tabulacion+=1;
 
@@ -405,6 +478,7 @@ public class Traductor_Go extends Traductor {
                 traducir_case(hijo,variable);
             }else if (hijo.getNombre()=="instruccion"){
                 traducir(hijo);
+                this.tabulacion-=1;
             }
         }
     };
@@ -414,6 +488,7 @@ public class Traductor_Go extends Traductor {
 
         Boolean hayIncremental=false;
         String aux="for ";
+        String Variable = "";
 
         for (Nodo hijo: nodo.getHijos()) {
             if (hijo.getNombre() == "Incremental") {
@@ -423,25 +498,27 @@ public class Traductor_Go extends Traductor {
 
         for (Nodo hijo: nodo.getHijos()) {
             if (hijo.getNombre()=="<Variable>"){
-                aux += hijo.getValor() + " in range (" ;
+                Variable = hijo.getValor();
+                aux += Variable + " :=" ;
             } else if (hijo.getNombre()=="<Valor inicial>") {
-                aux+=traducir_valor(hijo.getValor()) + ",";
+                aux+=traducir_valor(hijo.getValor()) + ";";
             } else if (hijo.getNombre()=="<Valor final>") {
                 if (hayIncremental){
-                    aux+=traducir_valor(hijo.getValor()) + ",";
+                    aux+= Variable + "<" + traducir_valor(hijo.getValor()) + ";";
                 }else{
-                    aux+=traducir_valor(hijo.getValor()) + "):";
+                    aux+=Variable + "<" + traducir_valor(hijo.getValor()) + ";" + Variable + "++" + " {";
                     encolar(aux);
                     this.tabulacion+=1;
                 }
             } else if (hijo.getNombre()=="Incremental") {
-                aux+=traducir_valor(hijo.getValor()) + "):";
+                aux+=Variable + "+=" + traducir_valor(hijo.getValor()) + "{";
                 encolar(aux);
                 this.tabulacion+=1;
             } else if (hijo.getNombre()=="instruccion") {
                 traducir(hijo);
             } else if (hijo.getNombre()=="<END_FOR>") {
                 this.tabulacion-=1;
+                encolar("}");
             }
         }
     };
@@ -483,7 +560,7 @@ public class Traductor_Go extends Traductor {
 
     @Override
     public void traducir_metodo(Nodo nodo){
-        String aux="def ";
+        String aux="";
         Boolean hayParametros=false;
 
         for (Nodo hijo: nodo.getHijos()) {
@@ -495,21 +572,25 @@ public class Traductor_Go extends Traductor {
 
         for (Nodo hijo: nodo.getHijos()) {
             if (hijo.getNombre() == "Nombre") {
+
+                aux += hijo.getValor() + ":= func";
+
                 if (!hayParametros){
-                    aux+= hijo.getValor() + "():";
+                    aux+= "(){";
                     encolar(aux);
                     this.tabulacion+=1;
                 }else{
-                    aux+= hijo.getValor() + "(";
+                    aux+="(";
                 }
             } else if (hijo.getNombre() == "parametros") {
-                aux+=getVariablesParametros(hijo.getValor()) + "):";
+                aux+=getVariablesParametros(hijo.getValor()) + "){";
                 encolar(aux);
                 this.tabulacion+=1;
             } else if (hijo.getNombre() == "instruccion") {
                 traducir(hijo);
             } else if (hijo.getNombre() == "FIN_METODO") {
                 this.tabulacion-=1;
+                encolar("}");
             }
         }
     };
@@ -526,10 +607,21 @@ public class Traductor_Go extends Traductor {
                 String nombre = ParserSym.terminalNames[aux.sym];
                 String valor_token = aux.value.toString();
 
+
                 if (nombre=="VARIABLE"){
                     respuesta+=valor_token;
                 } else if (nombre=="COMA") {
                     respuesta+=valor_token;
+                } else if (nombre=="TIPO") {
+                    if ("numero".equalsIgnoreCase(valor_token)){
+                        respuesta += " int";
+                    } else if ("cadena".equalsIgnoreCase(valor_token)) {
+                        respuesta += " string";
+                    } else if ("boolean".equalsIgnoreCase(valor_token)) {
+                        respuesta += " boolean";
+                    } else if ("caracter".equalsIgnoreCase(valor_token)) {
+                        respuesta += " string";
+                    }
                 }
 
 
@@ -543,7 +635,8 @@ public class Traductor_Go extends Traductor {
     }
     @Override
     public void traducir_funcion(Nodo nodo){
-        String aux="def ";
+        String aux="";
+        String tipoFuncion="";
         Boolean hayParametros=false;
 
         for (Nodo hijo: nodo.getHijos()) {
@@ -551,33 +644,48 @@ public class Traductor_Go extends Traductor {
                 if (hijo.getValor()!="()"){
                     hayParametros=true;
                 }
+            }else if (hijo.getNombre() == "Tipo") {
+                if ("numero".equalsIgnoreCase(hijo.getValor())){
+                    tipoFuncion += " int";
+                } else if ("cadena".equalsIgnoreCase(hijo.getValor())) {
+                    tipoFuncion += " string";
+                } else if ("boolean".equalsIgnoreCase(hijo.getValor())) {
+                    tipoFuncion += " boolean";
+                } else if ("caracter".equalsIgnoreCase(hijo.getValor())) {
+                    tipoFuncion += " string";
+                }
             }
         }
 
 
         for (Nodo hijo: nodo.getHijos()) {
+
             if (hijo.getNombre() == "Nombre") {
+
+                aux += hijo.getValor() + ":= func";
+
                 if (!hayParametros){
-                    aux+= hijo.getValor() + "():";
+                    aux+= "(){";
                     encolar(aux);
                     this.tabulacion+=1;
                 }else{
-                    aux+= hijo.getValor() + "(";
+                    aux+="(";
                 }
             } else if (hijo.getNombre() == "parametros") {
-                if(hayParametros){
-                    aux+=getVariablesParametros(hijo.getValor()) + "):";
-                    encolar(aux);
-                }
-            } else if (hijo.getNombre() == "instruccion") {
+                aux+=getVariablesParametros(hijo.getValor()) + ") " + tipoFuncion + " {";
+                encolar(aux);
                 this.tabulacion+=1;
+            } else if (hijo.getNombre() == "instruccion") {
                 traducir(hijo);
             } else if (hijo.getNombre() == "RETURN") {
                 String retorno = "return " +traducir_valor(hijo.getValor().replaceAll(";",""));
                 encolar(retorno);
             } else if (hijo.getNombre() == "FIN_FUNCION") {
                 this.tabulacion-=1;
+                encolar("}");
             }
+
+
         }
     };
     @Override
@@ -605,8 +713,14 @@ public class Traductor_Go extends Traductor {
                     String[] parametros =hijo.getValor().replaceAll("\\(","").replaceAll("\\)","").split(",");
 
                     for(String parametro:parametros){
-                        aux += traducir_valor(parametro);
+                        if (parametro != parametros[parametros.length-1]){
+                            aux += traducir_valor(parametro) + ",";
+                        }else{
+                            aux += traducir_valor(parametro);
+                        }
                     }
+
+
                     aux+= ")";
                     if (salto_de_linea){
                         encolar(aux);
@@ -623,7 +737,15 @@ public class Traductor_Go extends Traductor {
 
     @Override
     public void imprimir(Nodo nodo){
-        String aux ="print(";
+        String aux ="";
+
+        if(nodo.getNombre()=="IMPRIMIR"){
+            aux+= "fmt.Print(";
+        }else{
+            aux+= "fmt.Println(";
+        }
+
+
         for (Nodo hijo : nodo.getHijos()) {
             if (hijo.getNombre()=="Valor"){
                 aux += traducir_valor(hijo.getValor()) + ")";
@@ -635,6 +757,10 @@ public class Traductor_Go extends Traductor {
 
         }
 
+
+        if (!this.cabecera.contains("fmt")){
+            this.cabecera.add("fmt");
+        }
 
     }
 

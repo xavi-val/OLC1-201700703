@@ -1,11 +1,11 @@
-package com.backend.compiladores.services;
+package com.backend.compiladores.services.helper;
 
 import java_cup.runtime.*;
-import com.backend.compiladores.services.ParserSym;
+import com.backend.compiladores.services.helper.golang_helperSym;
 
 %%
 %public
-%class Lexer
+%class golang_helper_lexer
 
 %line
 %column
@@ -106,6 +106,8 @@ end_function =fin_funcion
 ejecutar =ejecutar
 imprimir =imprimir
 imprimir_sin_salto=imprimir_nl
+potencia_golang=math.Pow
+float=float64
 
 
 //Variables
@@ -124,95 +126,96 @@ variable = \_{letter}({letter}|{digit})*\_
 %}
 
 %eofval{
-    return symbol(ParserSym.EOF, "EOF");
+    return symbol(golang_helperSym.EOF, "EOF");
 %eofval}
 
 
 %%
 //Comentarios
-{comment} { return symbol(ParserSym.COMENTARIO, yytext());} //O
+{comment} { return symbol(golang_helperSym.COMENTARIO, yytext());} //O
 
 //Tipos de datos
-{numero} { return symbol(ParserSym.NUMERO, yytext()); } //O
-{string} { return symbol(ParserSym.CADENA, yytext()); } //O
-{Boolean} { return symbol(ParserSym.BOOLEAN, yytext()); } //O
-{character} { return symbol(ParserSym.CARACTER, yytext()); } //O
+{numero} { return symbol(golang_helperSym.NUMERO, yytext()); } //O
+{string} { return symbol(golang_helperSym.CADENA, yytext()); } //O
+{Boolean} { return symbol(golang_helperSym.BOOLEAN, yytext()); } //O
+{character} { return symbol(golang_helperSym.CARACTER, yytext()); } //O
 
 //Simbolos matematicos
-{suma} { return symbol(ParserSym.SUMA, yytext()); } //O
-{resta} { return symbol(ParserSym.RESTA, yytext()); } //O
-{multiplicacion} { return symbol(ParserSym.MULTI, yytext()); } //O
-{division} { return symbol(ParserSym.DIVI, yytext()); } //O
+{suma} { return symbol(golang_helperSym.SUMA, yytext()); } //O
+{resta} { return symbol(golang_helperSym.RESTA, yytext()); } //O
+{multiplicacion} { return symbol(golang_helperSym.MULTI, yytext()); } //O
+{division} { return symbol(golang_helperSym.DIVI, yytext()); } //O
 
 //Operadores relacionales
-{mayor} { return symbol(ParserSym.MAYOR, yytext()); }//O
-{menor} { return symbol(ParserSym.MENOR, yytext());}//O
-{mayorIgual} { return symbol(ParserSym.MAYORIGUAL, yytext());}//O
-{menorIgual} { return symbol(ParserSym.MENORIGUAL, yytext());}//O
-{igual} { return symbol(ParserSym.IGUAL, yytext());}//O
-{diferente} { return symbol(ParserSym.DIFERENTE, yytext());}//O
+{mayor} { return symbol(golang_helperSym.MAYOR, yytext()); }//O
+{menor} { return symbol(golang_helperSym.MENOR, yytext());}//O
+{mayorIgual} { return symbol(golang_helperSym.MAYORIGUAL, yytext());}//O
+{menorIgual} { return symbol(golang_helperSym.MENORIGUAL, yytext());}//O
+{igual} { return symbol(golang_helperSym.IGUAL, yytext());}//O
+{diferente} { return symbol(golang_helperSym.DIFERENTE, yytext());}//O
 
 //operadores logicos
-{or} {return symbol(ParserSym.OR, yytext());}//O
-{and} {return symbol(ParserSym.AND, yytext());}//O
-{not} { return symbol(ParserSym.NOT, yytext());}//O
+{or} {return symbol(golang_helperSym.OR, yytext());}//O
+{and} {return symbol(golang_helperSym.AND, yytext());}//O
+{not} { return symbol(golang_helperSym.NOT, yytext());}//O
 
 
 //Sibolos de un solo caracter - Inicio
-{asignacion} { return symbol(ParserSym.ASIGNACION, yytext()); } //O
-{coma} { return symbol(ParserSym.COMA, yytext()); }//O
-{scolon} { return symbol(ParserSym.SEMI_COLON, yytext()); }
-{Lpar} { return symbol(ParserSym.LPAREN, yytext()); } //O
-{Rpar} { return symbol(ParserSym.RPAREN, yytext()); } //O
-{Lque} { return symbol(ParserSym.LQUE, yytext()); } //0
-{Rque} { return symbol(ParserSym.RQUE, yytext()); } //0
-{Lcor} { return symbol(ParserSym.LCOR, yytext()); } //0
-{Rcor} { return symbol(ParserSym.RCOR, yytext()); } //0
+{asignacion} { return symbol(golang_helperSym.ASIGNACION, yytext()); } //O
+{coma} { return symbol(golang_helperSym.COMA, yytext()); }//O
+{scolon} { return symbol(golang_helperSym.SEMI_COLON, yytext()); }
+{Lpar} { return symbol(golang_helperSym.LPAREN, yytext()); } //O
+{Rpar} { return symbol(golang_helperSym.RPAREN, yytext()); } //O
+{Lque} { return symbol(golang_helperSym.LQUE, yytext()); } //0
+{Rque} { return symbol(golang_helperSym.RQUE, yytext()); } //0
+{Lcor} { return symbol(golang_helperSym.LCOR, yytext()); } //0
+{Rcor} { return symbol(golang_helperSym.RCOR, yytext()); } //0
 
 
 //Palabras reservadas - Tipado
-{tipado_numero} { return symbol(ParserSym.TIPO, yytext()); } //O
-{tipado_cadena} { return symbol(ParserSym.TIPO, yytext()); } //O
-{tipado_boolean} { return symbol(ParserSym.TIPO, yytext()); } //O
-{tipado_caracter} { return symbol(ParserSym.TIPO, yytext()); } //O
+{tipado_numero} { return symbol(golang_helperSym.TIPO, yytext()); } //O
+{tipado_cadena} { return symbol(golang_helperSym.TIPO, yytext()); } //O
+{tipado_boolean} { return symbol(golang_helperSym.TIPO, yytext()); } //O
+{tipado_caracter} { return symbol(golang_helperSym.TIPO, yytext()); } //O
 
 //Palabras reservadas - Inicio
-{potencia} { return symbol(ParserSym.POTENCIA, yytext()); } //O
-{modulo} { return symbol(ParserSym.MODULO, yytext()); } //O
-{inicio} { return symbol(ParserSym.INICIO, yytext()); } //O
-{fin} { return symbol(ParserSym.FIN, yytext()); } //O
-{ingresar} { return symbol(ParserSym.INGRESAR, yytext()); } //O
-{como} { return symbol(ParserSym.COMO, yytext()); } //O
-{con_valor} { return symbol(ParserSym.CON_VALOR, yytext()); } //O
-{if} { return symbol(ParserSym.IF, yytext()); } //O
-{else} { return symbol(ParserSym.ELSE, yytext()); } //0
-{else_if} { return symbol(ParserSym.ELSE_IF, yytext()); }//O
-{then} { return symbol(ParserSym.THEN, yytext()); } //repetido en if, select case //O
-{end_if} { return symbol(ParserSym.END_IF, yytext()); } //O
-{select} { return symbol(ParserSym.SELECT, yytext()); } //0
-{case} { return symbol(ParserSym.CASE, yytext()); } //repetido en for , select case, mientras //0
-{end_select} { return symbol(ParserSym.END_SELECT, yytext()); } //0
-{for} { return symbol(ParserSym.FOR, yytext()); } //0
-{to} { return symbol(ParserSym.TO, yytext()); } //0
-{end_for} { return symbol(ParserSym.END_FOR, yytext()); } //0
-{incremental} { return symbol(ParserSym.INCREMENTAL, yytext()); } //0
-{while} { return symbol(ParserSym.WHILE, yytext()); }//0
-{end_while} { return symbol(ParserSym.END_WHILE, yytext()); } //0
-{repetir} { return symbol(ParserSym.REPETIR, yytext()); } //0
-{hasta_que} { return symbol(ParserSym.HASTA_QUE, yytext()); } //0
-{return} { return symbol(ParserSym.RETURN, yytext()); }
-{metodo} { return symbol(ParserSym.METODO, yytext()); }
-{fin_metodo} { return symbol(ParserSym.FIN_METODO, yytext()); }
-{con_parametros} { return symbol(ParserSym.CON_PARAMETROS, yytext()); }
-{function} { return symbol(ParserSym.FUNCTION, yytext()); }
-{end_function} { return symbol(ParserSym.END_FUNCTION, yytext()); }
-{ejecutar} { return symbol(ParserSym.EJECUTAR, yytext()); }
-{imprimir} { return symbol(ParserSym.IMPRIMIR, yytext()); }
-{imprimir_sin_salto} { return symbol(ParserSym.IMPRIMIR_SIN_SALTO, yytext()); }
-
+{potencia} { return symbol(golang_helperSym.POTENCIA, yytext()); } //O
+{modulo} { return symbol(golang_helperSym.MODULO, yytext()); } //O
+{inicio} { return symbol(golang_helperSym.INICIO, yytext()); } //O
+{fin} { return symbol(golang_helperSym.FIN, yytext()); } //O
+{ingresar} { return symbol(golang_helperSym.INGRESAR, yytext()); } //O
+{como} { return symbol(golang_helperSym.COMO, yytext()); } //O
+{con_valor} { return symbol(golang_helperSym.CON_VALOR, yytext()); } //O
+{if} { return symbol(golang_helperSym.IF, yytext()); } //O
+{else} { return symbol(golang_helperSym.ELSE, yytext()); } //0
+{else_if} { return symbol(golang_helperSym.ELSE_IF, yytext()); }//O
+{then} { return symbol(golang_helperSym.THEN, yytext()); } //repetido en if, select case //O
+{end_if} { return symbol(golang_helperSym.END_IF, yytext()); } //O
+{select} { return symbol(golang_helperSym.SELECT, yytext()); } //0
+{case} { return symbol(golang_helperSym.CASE, yytext()); } //repetido en for , select case, mientras //0
+{end_select} { return symbol(golang_helperSym.END_SELECT, yytext()); } //0
+{for} { return symbol(golang_helperSym.FOR, yytext()); } //0
+{to} { return symbol(golang_helperSym.TO, yytext()); } //0
+{end_for} { return symbol(golang_helperSym.END_FOR, yytext()); } //0
+{incremental} { return symbol(golang_helperSym.INCREMENTAL, yytext()); } //0
+{while} { return symbol(golang_helperSym.WHILE, yytext()); }//0
+{end_while} { return symbol(golang_helperSym.END_WHILE, yytext()); } //0
+{repetir} { return symbol(golang_helperSym.REPETIR, yytext()); } //0
+{hasta_que} { return symbol(golang_helperSym.HASTA_QUE, yytext()); } //0
+{return} { return symbol(golang_helperSym.RETURN, yytext()); }
+{metodo} { return symbol(golang_helperSym.METODO, yytext()); }
+{fin_metodo} { return symbol(golang_helperSym.FIN_METODO, yytext()); }
+{con_parametros} { return symbol(golang_helperSym.CON_PARAMETROS, yytext()); }
+{function} { return symbol(golang_helperSym.FUNCTION, yytext()); }
+{end_function} { return symbol(golang_helperSym.END_FUNCTION, yytext()); }
+{ejecutar} { return symbol(golang_helperSym.EJECUTAR, yytext()); }
+{imprimir} { return symbol(golang_helperSym.IMPRIMIR, yytext()); }
+{imprimir_sin_salto} { return symbol(golang_helperSym.IMPRIMIR_SIN_SALTO, yytext()); }
+{potencia_golang} { return symbol(golang_helperSym.POTENCIA, yytext()); }
+{float} { return symbol(golang_helperSym.FLOAT, yytext()); }
 
 //Variables
-{variable} { return symbol(ParserSym.VARIABLE,yytext()); }
+{variable} { return symbol(golang_helperSym.VARIABLE,yytext()); }
 
 {whitespace} {/*SKIP WHITE SPACE*/}
-[^] { return symbol(ParserSym.ERROR, yytext()); }
+[^] { return symbol(golang_helperSym.ERROR, yytext()); }

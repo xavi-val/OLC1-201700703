@@ -3,17 +3,14 @@ package com.backend.compiladores.services.traductor;
 import com.backend.compiladores.services.parserPackage.Nodo;
 import java_cup.runtime.ScannerBuffer;
 import java.io.*;
+import java.util.ArrayList;
 
 public abstract class Traductor {
 
     public String final_traduction="An easter egg";
-    public String cabecera="";
+    public ArrayList<String> cabecera = new ArrayList<String>();
 
     public ScannerBuffer listaTokens;
-
-    public Traductor(ScannerBuffer buffer){
-        this.listaTokens = buffer;
-    }
 
     public Traductor(){
 
