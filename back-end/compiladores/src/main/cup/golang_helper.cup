@@ -1,0 +1,491 @@
+package com.backend.compiladores.services;
+
+import java_cup.runtime.*;
+import com.backend.compiladores.services.traductor.*;
+import com.backend.compiladores.services.parserPackage.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+
+class Parser;
+
+
+parser code
+{:
+//HACER CASO OMISO A ESTOS ERRORES SI ESTAS USANDO INTELLIJ
+//Reescritura de los metodos nativos de CUP para mi conveniencia
+    public Symbol s;
+    public LinkedList<String> p_list = new LinkedList();
+
+    //Asigna el token de error para despues poder sacarlo con el get
+    public void syntax_error(Symbol s){
+        this.s = s;
+        this.report_expected_token_ids();
+    }
+
+    //Sacamos el token que da error
+    public Symbol getSymbolError(){
+        return this.s;
+
+    }
+
+
+    //CUP nos da una lista de los posibles token que se esperaban
+    protected void report_expected_token_ids() {
+        List<Integer> ids = this.expected_token_ids();
+        LinkedList<String> list = new LinkedList();
+        Iterator var3 = ids.iterator();
+
+        while(var3.hasNext()) {
+            Integer expected = (Integer)var3.next();
+            list.add(this.symbl_name_from_id(expected));
+        }
+
+        this.p_list=list;
+    }
+
+    //Sacamos esa lista
+    public LinkedList<String> getExpectedTokens(){
+            return this.p_list;
+    }
+
+    //-----------------------------------------------------------
+
+    public Ast ast = new Ast();
+    public long contador = 1;
+
+    /*ARRAY OF OBJECT TO STRING = ats*/
+    private String ats(Object[] array){
+        String answer = "";
+
+        for(int i = 0; i < array.length; i++) {
+          answer+= array[i].toString();
+        }
+
+        return answer;
+    }
+
+:};
+
+
+non terminal
+/*Inicio*/
+inicio,
+/*Instrucciones*/
+instruccion, lista_instrucciones,
+/*Expresiones*/
+expr,
+/*Valores*/
+valor,
+/*Declaraciones*/
+declaracion,lista_variables,lista_valores,
+/*Comentario*/
+
+/*Asignacion*/
+asignar,
+/*condicion*/
+condicion, op_relacional, op_logico,
+/*Condicionales*/
+if, elseif, else,
+/*SELECT CASE*/
+select_case, list_case, default,
+/*CICLO PARA*/
+for, incremental,
+/*CICLO MIENTRAS*/
+mientras,
+/*CICLO Repetir hasta*/
+repetir,
+/* RETORNO */
+retorno,
+/*METODO*/
+metodo, con_parametros ,lista_parametros_con_tipo,
+/*FUNCION*/
+funcion,
+/*EJECUTAR*/
+ejecutar, lista_parametros,
+/*IMPRIMIR*/
+imprimir
+
+;
+terminal
+/*Bloque principal o de inicio*/
+INICIO,FIN,
+/*Expresiones*/
+SUMA,RESTA,MULTI,DIVI,POTENCIA,MODULO,LPAREN,RPAREN,LCOR,RCOR,
+/*Valores*/
+NUMERO, CADENA, BOOLEAN, CARACTER,
+/*Declaracion*/
+INGRESAR, VARIABLE, COMO, TIPO, CON_VALOR, COMA, SEMI_COLON,
+/*Comentarios*/
+COMENTARIO,
+/*Asignacion*/
+ASIGNACION,
+/*Operadores relacionales y logicos*/
+MAYOR, MENOR, MAYORIGUAL,MENORIGUAL,IGUAL,DIFERENTE,OR,AND,NOT,
+/*Condicionales*/
+IF,THEN,END_IF, ELSE, ELSE_IF,
+/*SELECT -CASE*/
+SELECT,CASE,END_SELECT,LQUE,RQUE,
+/*FOR*/
+FOR, TO, END_FOR, INCREMENTAL,
+/*WHILE*/
+WHILE, END_WHILE,
+/*REPETIR HASTA QUE*/
+REPETIR, HASTA_QUE,
+/*RETORNO*/
+RETURN,
+/*METODO*/
+METODO, FIN_METODO, CON_PARAMETROS,
+/*FUNCION*/
+FUNCTION, END_FUNCTION,
+/*EJECUTAR*/
+EJECUTAR,
+IMPRIMIR,IMPRIMIR_SIN_SALTO,
+/*ERRORES*/
+ERROR
+;
+
+/*Precedencia de operadores para expresiones*/
+precedence left SUMA, RESTA;
+precedence left MULTI, DIVI, MODULO;
+precedence left POTENCIA;
+
+/*Precedencia de operadores relacionales y logicos*/
+precedence left MAYOR , MENOR , MAYORIGUAL , MENORIGUAL , IGUAL , DIFERENTE;
+precedence left OR,AND;
+
+
+start with inicio;
+
+inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
+        {:
+            Nodo tmp = new Nodo("Global","");
+            tmp.setNumNodo(contador++);
+            tmp.addHijo(new Nodo("inicio",e1.toString(),contador++));
+            tmp.addHijo((Nodo) e2);
+            tmp.addHijo(new Nodo("final", e3.toString(),contador++));
+            ast.raiz = tmp;
+            RESULT=tmp;
+        :}
+        |  ERROR:e1{::};
+
+
+lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
+                     {:
+                        Nodo tmp = new Nodo("instruccion","");
+                        tmp.setNumNodo(contador++);
+                        tmp.addHijo((Nodo)e1);
+                        tmp.addHijo((Nodo)e2);
+                        RESULT=tmp;
+                     :}
+                     | /*Vacio*/;
+
+instruccion ::= declaracion:e1
+            {:RESULT=e1;:}
+            | asignar:e2
+            {:RESULT=e2;:}
+            | if:e3
+            {:RESULT=e3;:}
+            | select_case:e3
+            {:RESULT=e3;:}
+            | for:e4
+            {:RESULT=e4;:}
+            | mientras:e5
+            {:RESULT=e5;:}
+            | repetir:e6
+            {:RESULT=e6;:}
+            | metodo:e7
+            {:RESULT=e7;:}
+            | funcion:e8
+            {:RESULT=e8;:}
+            | ejecutar:e9
+            {:RESULT=e9;:}
+            | imprimir:e10
+            {:RESULT=e10;:}
+            | COMENTARIO:e20
+            {:
+                Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
+                tmp.setNumNodo(contador++);
+                RESULT=tmp;
+            :};
+
+
+/*Valores*/
+valor ::= CADENA:e1 {: RESULT =  ats(new Object[] {e1}) ; :}
+        | condicion:e2 {: RESULT = ats(new Object[] {e2}) ; :} /*condicion esta declarado mas abajo 👇 */
+        | CARACTER:e3 {: RESULT = ats(new Object[] {e3}) ; :}
+        | expr:e4 {: RESULT = ats(new Object[] {e4}) ; :};
+        /*| LPAREN:e1 valor:e2 RPAREN:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ; :};*/
+
+/*Expresiones*/
+expr ::= expr:e1 SUMA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 RESTA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MULTI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 DIVI:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 MODULO:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |expr:e1 POTENCIA:e2 LCOR:e3 expr:e4 RCOR:e5  {:RESULT = ats(new Object[] {e1,e2,e3,e4,e5}) ;:}
+        |LPAREN:e1 expr:e2 RPAREN:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+        |RESTA:e1 NUMERO:e2 {:RESULT = ats(new Object[] {e1,e2}) ;:}
+        |NUMERO:e1 {: RESULT = ats(new Object[] {e1}) ; :}
+        |VARIABLE:e1 {: RESULT = ats(new Object[] {e1}) ; :};
+
+/*Declaracion*/
+lista_variables ::= VARIABLE:e1 COMA:e2 lista_variables:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+                | VARIABLE:e1 {: RESULT = ats(new Object[] {e1}) ;:};
+
+lista_valores ::= valor:e1 COMA:e2 lista_valores:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+                | valor:e1 {: RESULT = ats(new Object[] {e1}) ;:};
+
+declaracion ::= INGRESAR:e1 lista_variables:e2 COMO:e3 TIPO:e4 CON_VALOR:e5 lista_valores:e6 SEMI_COLON:e7
+{:
+    Nodo tmp = new Nodo("Declaracion","");
+    tmp.setNumNodo(contador++);
+    tmp.addHijo(new Nodo("Ingresar",e1.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Variables",e2.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo("COMO",e3.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("TIPO",e4.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("CON_VALOR",e5.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Valores",e6.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo(";",e7.toString(),contador++)) /*terminal*/;
+    RESULT=tmp;
+ :};
+
+/*Asignacion*/
+asignar ::= lista_variables:e1 ASIGNACION:e2 valor:e3 SEMI_COLON:e4
+{:
+    Nodo tmp = new Nodo("Asignacion","");
+    tmp.setNumNodo(contador++);
+    tmp.addHijo(new Nodo("Variables",e1.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo("Asignar",e2.toString(),contador++)) /*terminal*/;
+    tmp.addHijo(new Nodo("Valores",e3.toString(),contador++)) /*terminal-indirecto*/;
+    tmp.addHijo(new Nodo(";",e4.toString(),contador++)) /*terminal*/;
+    RESULT=tmp;
+:} ;
+
+/*Condiciones*/
+
+op_relacional ::= MAYOR:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MENOR:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MAYORIGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | MENORIGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | IGUAL:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                | DIFERENTE:e1
+                {:RESULT = ats(new Object[] {e1}) ;:}
+                ;
+op_logico ::= OR:e1 {:RESULT = ats(new Object[] {e1}) ;:}
+            |AND:e1 {:RESULT = ats(new Object[] {e1}) ;:};
+
+condicion ::=
+             expr:e1 op_relacional:e2 expr:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | LPAREN:e1 condicion:e2 RPAREN:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | condicion:e1 op_logico:e2 condicion:e3
+            {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
+            | NOT:e1 condicion:e2
+            {:RESULT = ats(new Object[] {e1,e2}) ;:}
+            | BOOLEAN:e1
+            {:RESULT = ats(new Object[] {e1}) ;:};
+
+/*IF*/
+
+
+elseif ::= ELSE_IF:e1 valor:e2 THEN:e3 lista_instrucciones:e4 elseif:e5
+        {:
+            Nodo tmp = new Nodo("ELSE_IF",e1.toString(),contador++);
+            tmp.setNumNodo(contador++);
+            tmp.addHijo(new Nodo("condicion",e2.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("THEN",e3.toString(),contador++)) /*terminal*/;
+            tmp.addHijo((Nodo)e4);
+            if(e5 != null  && e5.toString()!=""){
+                tmp.addHijo((Nodo)e5);
+            }
+            RESULT=tmp;
+        :}
+        | {:RESULT="";:} /*Vacio*/;
+
+else ::= ELSE:e1 lista_instrucciones:e2
+        {:
+            Nodo tmp = new Nodo("ELSE",e1.toString(),contador++);
+            tmp.setNumNodo(contador++);
+            tmp.addHijo((Nodo)e2);
+            RESULT=tmp;
+        :}
+       | {:RESULT="";:} /*Vacio*/;
+
+if ::=  IF:e1 valor:e2 THEN:e3 lista_instrucciones:e4 elseif:e5 else:e6 END_IF:e7
+        {:
+        Nodo tmp = new Nodo("IF",e1.toString(),contador++);
+        tmp.setNumNodo(contador++);
+        tmp.addHijo(new Nodo("condicion",e2.toString(),contador++)) /*terminal*/;
+        tmp.addHijo(new Nodo("THEN",e3.toString(),contador++)) /*terminal*/;
+        tmp.addHijo((Nodo)e4);
+        if(e5 != null && e5.toString()!=""){
+            tmp.addHijo((Nodo)e5); /*No terminal*/
+        }
+        if(e6 != null && e6.toString()!=""){
+            tmp.addHijo((Nodo)e6);
+        }
+        tmp.addHijo(new Nodo("END_IF",e7.toString(),contador++)) /*terminal*/;
+        RESULT=tmp;
+    :};
+
+
+/*SELECT CASE*/
+
+list_case::= LQUE:e1 expr:e2 RQUE:e3 THEN:e4 lista_instrucciones:e5 list_case:e6
+            {:
+                Nodo tmp = new Nodo("case",ats(new Object[] {e1,e2,e3,e4}),contador++);
+                tmp.setNumNodo(contador++);
+                tmp.addHijo((Nodo)e5);
+                if(e6 != null && e6.toString()!=""){
+                    tmp.addHijo((Nodo)e6);
+                }
+                RESULT=tmp;
+            :}
+           | {:RESULT="";:}; /*Vacio*/
+
+default::=  ELSE:e1 THEN:e2 lista_instrucciones:e3
+            {:
+                Nodo tmp = new Nodo("default",ats(new Object[] {e1,e2}),contador++);
+                tmp.setNumNodo(contador++);
+                if(e3 != null && e3.toString()!=""){
+                    tmp.addHijo((Nodo)e3);
+                }
+                RESULT=tmp;
+            :}
+            | {:RESULT="";:} /*Vacio*/;
+
+select_case::= SELECT:e1 expr:e2 CASE:e3 list_case:e4 default:e5 END_SELECT:e6
+            {:
+                Nodo tmp = new Nodo("SELECT",e1.toString(),contador++);
+                tmp.addHijo(new Nodo("<Valor>",e2.toString(),contador++));
+                tmp.addHijo(new Nodo("hacer",e3.toString(),contador++));
+                tmp.setNumNodo(contador++);
+                if(e4 != null && e4.toString()!=""){
+                    tmp.addHijo((Nodo)e4);
+                }
+                if(e5 != null && e5.toString()!=""){
+                    tmp.addHijo((Nodo)e5);
+                }
+                tmp.addHijo(new Nodo("END_SELECT",e6.toString(),contador++));
+                RESULT=tmp;
+            :};
+
+incremental::= INCREMENTAL:e1 expr:e2
+            {:
+                RESULT= ats(new Object[] {e1,e2});
+            :}
+            | {:RESULT="";:} /*Vacio*/;
+
+for ::= FOR:e1 VARIABLE:e2 ASIGNACION:e3 expr:e4 TO:e5 expr:e6 incremental:e7 CASE:e8 lista_instrucciones:e9 END_FOR:e10
+        {:
+            Nodo tmp = new Nodo("FOR",e1.toString(),contador++);
+            tmp.addHijo(new Nodo("<Variable>",e2.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("Asignacion",e3.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("<Valor inicial>",e4.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("Hasta",e5.toString(),contador++)) /*terminal*/;
+            tmp.addHijo(new Nodo("<Valor final>",e6.toString(),contador++)) /*terminal*/;
+            if(e7 != null && e7.toString()!=""){
+                tmp.addHijo(new Nodo("Incremental",e7.toString(),contador++)) /*terminal*/;
+            }
+            tmp.addHijo(new Nodo("Hacer",e8.toString(),contador++)) /*terminal*/;
+            tmp.addHijo((Nodo) e9) /*no terminal*/;
+            tmp.addHijo(new Nodo("<END_FOR>",e10.toString(),contador++)) /*terminal*/;
+            RESULT=tmp;
+        :};
+
+
+mientras ::= WHILE:e1 valor:e2 CASE:e3 lista_instrucciones:e4 END_WHILE:e5
+            {:
+                Nodo tmp = new Nodo("WHILE",e1.toString(),contador++);
+                tmp.addHijo(new Nodo("<condicion>",e2.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("Hacer",e3.toString(),contador++)) /*terminal*/;
+                tmp.addHijo((Nodo) e4) /*no terminal*/;
+                tmp.addHijo(new Nodo("END_WHILE",e5.toString(),contador++)) /*terminal*/;
+                RESULT=tmp;
+            :};
+
+repetir ::= REPETIR:e1 lista_instrucciones:e2 HASTA_QUE:e3 valor:e4
+            {:
+                Nodo tmp = new Nodo("REPETIR",e1.toString(),contador++);
+                tmp.addHijo((Nodo) e2) /*no terminal*/;
+                tmp.addHijo(new Nodo("HASTA_QUE",e3.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("<condicion>",e4.toString(),contador++)) /*terminal*/;
+                RESULT=tmp;
+            :};
+
+retorno ::= RETURN:e1 valor:e2 SEMI_COLON:e3
+        {: RESULT= ats(new Object[] {e1,e2,e3}); :};
+
+lista_parametros_con_tipo ::=  VARIABLE:e1 TIPO:e2 COMA:e3 lista_parametros_con_tipo:e4
+                      {: RESULT= ats(new Object[] {e1,e2,e3,e4}); :}
+                |     VARIABLE:e1 TIPO:e2
+                      {: RESULT= ats(new Object[] {e1,e2}); :}
+                |   /*VACIO*/ {:RESULT="";:};
+
+con_parametros::= CON_PARAMETROS:e1 LPAREN:e2 lista_parametros_con_tipo:e3 RPAREN:e4
+                {: RESULT= ats(new Object[] {e1,e2,e3,e4}); :}
+                | /*VACIO*/ {:RESULT="";:};
+
+metodo ::= METODO:e1 VARIABLE:e2 con_parametros:e3 lista_instrucciones:e4 FIN_METODO:e5
+            {:
+                Nodo tmp = new Nodo("METODO",e1.toString(),contador++);
+                tmp.addHijo(new Nodo("Nombre",e2.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("parametros",e3.toString(),contador++)) /*terminal*/;
+                tmp.addHijo((Nodo) e4) /*no terminal*/;
+                tmp.addHijo(new Nodo("FIN_METODO",e5.toString(),contador++)) /*terminal*/;
+                RESULT=tmp;
+            :};
+
+funcion ::= FUNCTION:e1 VARIABLE:e2 TIPO:e3 con_parametros:e4 lista_instrucciones:e5 retorno:e6 END_FUNCTION:e7
+            {:
+                Nodo tmp = new Nodo("FUNCION",e1.toString(),contador++);
+                tmp.addHijo(new Nodo("Nombre",e2.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("Tipo",e3.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("parametros",e4.toString(),contador++)) /*terminal*/;
+                tmp.addHijo((Nodo) e5) /*no terminal*/;
+                tmp.addHijo(new Nodo("RETURN",e6.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("FIN_FUNCION",e7.toString(),contador++)) /*terminal*/;
+                RESULT=tmp;
+            :};
+
+lista_parametros ::=  valor:e1 COMA:e2 lista_parametros:e3
+                      {: RESULT= ats(new Object[] {e1,e2,e3}); :}
+                |     valor:e1
+                      {: RESULT= ats(new Object[] {e1}); :}
+                |   /*VACIO*/ {:RESULT="";:};
+
+ejecutar ::= EJECUTAR:e1 VARIABLE:e2 LPAREN:e3 lista_parametros:e4 RPAREN:e5 SEMI_COLON:e6
+            {:
+                Nodo tmp = new Nodo("EJECUTAR",e1.toString(),contador++);
+                tmp.addHijo(new Nodo("Nombre",e2.toString(),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo("parametros",ats(new Object[] {e3,e4,e5}),contador++)) /*terminal*/;
+                tmp.addHijo(new Nodo(";",e6.toString(),contador++)) /*terminal*/;
+                RESULT=tmp;
+            :};
+
+imprimir ::= IMPRIMIR:e1 valor:e2 SEMI_COLON:e3
+            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+              tmp.addHijo(new Nodo("Valor",e2.toString(),contador++)) /*terminal*/;
+              tmp.addHijo(new Nodo(";",e3.toString(),contador++)) /*terminal*/;
+              RESULT=tmp;:}
+            | IMPRIMIR:e1 ejecutar:e2
+            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+              tmp.addHijo((Nodo) e2) /*no terminal*/;
+              RESULT=tmp;:}
+            | IMPRIMIR_SIN_SALTO:e1 valor:e2 SEMI_COLON:e3
+            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+              tmp.addHijo(new Nodo("Valor",e2.toString(),contador++)) /*terminal*/;
+              tmp.addHijo(new Nodo(";",e3.toString(),contador++)) /*terminal*/;
+              RESULT=tmp;:}
+            | IMPRIMIR_SIN_SALTO:e1 ejecutar:e2
+            {:Nodo tmp = new Nodo("IMPRIMIR",e1.toString(),contador++);
+              tmp.addHijo((Nodo) e2) /*no terminal*/;
+              RESULT=tmp;:};

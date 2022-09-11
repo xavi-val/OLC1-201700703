@@ -1,44 +1,63 @@
 package com.backend.compiladores.services;
 
 
+import com.backend.compiladores.services.response.traductionResponse;
 import com.backend.compiladores.services.scanner.Token;
 import com.backend.compiladores.services.traductor.Traductor_Python;
 import java_cup.runtime.ScannerBuffer;
 import java_cup.runtime.Symbol;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.util.LinkedList;
 
 public class compilerController {
 
     public Traductor_Python traductor_python = new Traductor_Python();
 
-    public static String compile(String code, String lenguage){
+    public static traductionResponse compile(String code, String lenguage){
+
+        Lexer lexerHandler = new Lexer(new StringReader(code));
+        Parser parser = new Parser(lexerHandler);
+        traductionResponse response = new traductionResponse();
 
         if ("python".equals(lenguage)) {
-            //CREANDO UN STRINGREADER PARA LEER EL TEXTO DE ENTRADA
-            Reader stringReader = new StringReader(code);
-            //CREANDO EL ANALIZADOR LEXICO PARA QUE LE PASE LOS TOKENS A EL PARSER
-            Lexer lexerHandler = new Lexer(stringReader);
-            //PASANDO EL BUFFER AL PARSER (DENTRO DEL BUFFER ESTA EL ANALIZADOR LEXICO)
-            Parser p = new Parser(lexerHandler);
+
+            Traductor_Python TP = new Traductor_Python();
+
             try {
-                //ANALIZAMOS SINTACTICAMENTE LA ENTRADA
-                p.parse();
+                parser.parse();
+                parser.ast.graficar();
+                TP.traducir(parser.ast.raiz);
+
+
+                response.setTraduccion(TP.final_traduction);
+
+                String image = Files.readString(new File(".\\src\\main\\resources\\trees\\arbol.svg").toPath());
+                response.setImage(image);
+
             } catch (Exception e) {
-                //MANEJO DE ERRORES, sym.left = fila, sym.right = columna
-                Symbol sym = p.getSymbolError();
-                System.out.println("Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
-                throw new RuntimeException(e);
+
+                Symbol sym = parser.s;
+                LinkedList<String> expected_tokens = parser.getExpectedTokens();
+
+                if(sym != null){
+
+                    String salida = "ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value);
+                    salida += "\n se esperaban los siguientes TOKENS: " + expected_tokens.toString();
+                    response.setError(salida);
+                }
+                System.out.println(e);
             }
 
 
-            return "answer";
+            return response;
         }else if ("go".equals(lenguage)){
-            return "Esto fue compilado a " + lenguage +  " con exito" + "\n" + code ;
+            return null;
+            //return "Esto fue compilado a " + lenguage +  " con exito" + "\n" + code ;
         }else{
-            return "ERROR en el lenguaje de traduccion";
+            return null;
+            //return "ERROR en el lenguaje de traduccion";
         }        
     }
 }

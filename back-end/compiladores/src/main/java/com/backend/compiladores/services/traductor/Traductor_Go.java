@@ -4,7 +4,6 @@ import com.backend.compiladores.services.Lexer;
 import com.backend.compiladores.services.ParserSym;
 import com.backend.compiladores.services.parserPackage.Nodo;
 import java_cup.runtime.Symbol;
-import org.apache.tools.ant.types.Environment;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -12,25 +11,27 @@ import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Traductor_Python extends Traductor {
+public class Traductor_Go extends Traductor {
 
 
     private int tabulacion=0;
 
-    public Traductor_Python(){
+    public Traductor_Go(){
         this.final_traduction="";
     }
 
     @Override
     public void traducir(Nodo nodo) {
-        
+
         if (nodo.getHijos().size()!=0){
             for (Nodo hijo:nodo.getHijos()) {
-                
+
                 if (hijo.getNombre()=="instruccion"){
                     traducir(hijo);
                 } else if (hijo.getNombre()=="inicio") {
                     inicio();
+                } else if (hijo.getNombre()=="final") {
+                    encolar("}");
                 } else if (hijo.getNombre()=="comentario") {
                     comentario(hijo.getValor());
                 } else if (hijo.getNombre()=="Declaracion") {
@@ -58,6 +59,7 @@ public class Traductor_Python extends Traductor {
                 }
             }
         }
+
     }
 
 
@@ -77,28 +79,22 @@ public class Traductor_Python extends Traductor {
         this.final_traduction += tabular(texto);
     }
 
-
-
     @Override
     public void inicio() {
-        String aux = "if __name__ == \'__main__\':";
+        String aux = "func main(){";
         encolar(aux);
         this.tabulacion+=1;
     }
 
     @Override
     public void comentario(String comentario) {
-
-        String aux = comentario.replaceAll("\\/\\/","#");
-        aux = aux.replaceAll("\\/\\*","\'\'\'");
-        aux = aux.replaceAll("\\*\\/","\'\'\'");
-        encolar(aux);
+        encolar(comentario);
     }
 
     @Override
     public String traducir_booleano(String booleano) {
-        booleano = booleano.replaceAll("(?i)verdadero","True");
-        booleano = booleano.replaceAll("(?i)falso","False");
+        booleano = booleano.replaceAll("(?i)verdadero","true");
+        booleano = booleano.replaceAll("(?i)falso","false");
         return booleano;
     }
 
@@ -183,7 +179,7 @@ public class Traductor_Python extends Traductor {
                 /*Valores no traducidos*/
                 if (nombre=="CADENA"){
                     if (valor_token.contains("\n")){
-                        respuesta += valor_token.replaceAll("\"", "\"\"\"");
+                        respuesta += valor_token.replaceAll("\"", "`");
                     }else{
                         respuesta += valor_token;
                     }
@@ -204,11 +200,11 @@ public class Traductor_Python extends Traductor {
                 }else if (nombre=="DIFERENTE") {
                     respuesta += "!=";
                 }else if (nombre=="OR") {
-                    respuesta += "or";
+                    respuesta += "||";
                 }else if (nombre=="AND") {
-                    respuesta += "and";
+                    respuesta += "&&";
                 }else if (nombre=="NOT") {
-                    respuesta += "not";
+                    respuesta += "!";
                 }else if (nombre=="BOOLEAN") {
                     respuesta += traducir_booleano(valor_token);
                 }
@@ -230,7 +226,7 @@ public class Traductor_Python extends Traductor {
                 }else if (nombre=="MODULO") {
                     respuesta += "%";
                 }else if (nombre=="POTENCIA") {
-                    respuesta += "**";
+                    //PENDIENTE
                 }else if (nombre=="NUMERO") {
                     respuesta += valor_token;
                 }else if (nombre=="VARIABLE") {
@@ -350,11 +346,11 @@ public class Traductor_Python extends Traductor {
     public void traducir_else(Nodo nodo){
         String aux ="else :";
         for (Nodo hijo : nodo.getHijos()) {
-           if (hijo.getNombre()=="instruccion") {
+            if (hijo.getNombre()=="instruccion") {
                 encolar(aux);
                 this.tabulacion+=1;
                 traducir(hijo);
-           }
+            }
         }
 
     };
@@ -399,8 +395,8 @@ public class Traductor_Python extends Traductor {
     @Override
     public void traducir_case(Nodo nodo, String variable){
         String aux ="elif " + variable + " == " +   nodo.getValor().replaceAll("\\¿","")
-                                                                    .replaceAll("\\?","")
-                                                                    .replaceAll("(?i)entonces","") + " : ";
+                .replaceAll("\\?","")
+                .replaceAll("(?i)entonces","") + " : ";
         encolar(aux);
         this.tabulacion+=1;
 
@@ -473,14 +469,14 @@ public class Traductor_Python extends Traductor {
         this.tabulacion+=1;
 
         for (Nodo hijo: nodo.getHijos()) {
-             if (hijo.getNombre() == "instruccion") {
+            if (hijo.getNombre() == "instruccion") {
                 traducir(hijo);
             } else if (hijo.getNombre() == "<condicion>") {
-                 aux += "if " + traducir_valor(hijo.getValor()) + ":";
-                 encolar(aux);
-                 this.tabulacion+=1;
-                 encolar("break");
-                 this.tabulacion-=2;
+                aux += "if " + traducir_valor(hijo.getValor()) + ":";
+                encolar(aux);
+                this.tabulacion+=1;
+                encolar("break");
+                this.tabulacion-=2;
             }
         }
     };

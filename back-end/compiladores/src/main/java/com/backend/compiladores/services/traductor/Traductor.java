@@ -67,7 +67,7 @@ public abstract class Traductor {
 
     public abstract void traducir_funcion(Nodo nodo);
 
-    public abstract void traducir_llamadas(Nodo nodo);
+    public abstract String traducir_llamadas(Nodo nodo, Boolean salto_de_linea);
 
     public abstract void imprimir(Nodo nodo);
 }

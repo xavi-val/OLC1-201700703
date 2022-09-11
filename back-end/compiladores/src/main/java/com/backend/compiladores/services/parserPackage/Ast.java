@@ -27,9 +27,12 @@ public class Ast {
 
         try {
             String cmd = "dot -Tsvg " + path + "arbol.dot -o " + path + "arbol.svg";
-            Runtime.getRuntime().exec(cmd);
+            Process p = Runtime.getRuntime().exec(cmd);
+            p.waitFor();
         } catch (IOException ioe) {
             System.out.println(ioe +" 2");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
     }

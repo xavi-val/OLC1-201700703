@@ -5,9 +5,14 @@ const text_area1 = document.querySelector("#input1");
 const text_area2 = document.querySelector("#input2");
 const button_go = document.querySelector("#button_go");
 const button_python = document.querySelector("#button_python");
+const flowChartButton = document.querySelector("#flowChartID");
 
 /*MENU METHODS*/
 let selected_file;
+let ip = "192.168.1.11";
+text_area1.value = "inicio \n\nfin";
+text_area2.value = "";
+let imageUrl;
 
 button_upload.onclick = function () {
   file_selector.click();
@@ -35,10 +40,14 @@ function download(name) {
   save_file.download = name;
 }
 
+flowChartButton.onclick = function () {
+  window.open(imageUrl, "Flow Chart");
+};
+
 /*AJAX METHODS*/
 
 async function go() {
-  let res = await fetch("http://192.168.1.8:8080/go", {
+  let res = await fetch(`http://${ip}:8080/go`, {
     method: "POST",
     body: text_area1.value,
   });
@@ -47,12 +56,19 @@ async function go() {
 }
 
 async function Python() {
-  let res = await fetch("http://192.168.1.8:8080/python", {
+  let res = await fetch(`http://${ip}:8080/python`, {
     method: "POST",
     body: text_area1.value,
   });
-  let data = await res.text();
-  text_area2.value = data;
+  let data = await res.json();
+
+  console.log(data);
+
+  text_area2.value = data.traduccion;
+
+  //IMAGEN DE RESPUESTA
+  let blob = new Blob([data.image], { type: "image/svg+xml" });
+  imageUrl = URL.createObjectURL(blob);
 }
 
 button_python.onclick = () => {

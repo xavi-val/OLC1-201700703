@@ -3,6 +3,7 @@ package com.backend.compiladores;
 import com.backend.compiladores.services.Lexer;
 import com.backend.compiladores.services.Parser;
 import com.backend.compiladores.services.ParserSym;
+import com.backend.compiladores.services.traductor.Traductor_Go;
 import com.backend.compiladores.services.traductor.Traductor_Python;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
@@ -124,5 +125,54 @@ public class UniversalTest {
 
     }
 
+
+    @Test
+    public void testCaracteristicaTraductorGo(){
+
+        Traductor_Go traductor_go = new Traductor_Go();
+        String[] entradas = {
+                "(_base_ Numero, _exponenete_ Numero)"
+        };
+        for (String entrada:entradas) {
+            System.out.println(traductor_go.getVariablesParametros(entrada));
+        }
+
+
+    }
+
+    @Test
+    public void testTraductorGo(){
+
+        Lexer lexerHandler;
+        try {
+            lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        Parser parser = new Parser(lexerHandler);
+        Traductor_Go TG = new Traductor_Go();
+
+        try {
+            parser.parse();
+            parser.ast.graficar();
+            TG.traducir(parser.ast.raiz);
+            TG.generate_file("Traduction_GO.go");
+
+        } catch (Exception e) {
+
+            Symbol sym = parser.s;
+            LinkedList<String> expected_tokens = parser.getExpectedTokens();
+
+            if(sym != null){
+                System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
+                System.out.println(expected_tokens);
+            }
+
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
+
+    }
 
 }
