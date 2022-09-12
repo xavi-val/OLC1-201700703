@@ -3,6 +3,7 @@ package com.backend.compiladores.services;
 
 import com.backend.compiladores.services.response.traductionResponse;
 import com.backend.compiladores.services.scanner.Token;
+import com.backend.compiladores.services.traductor.Traductor_Go;
 import com.backend.compiladores.services.traductor.Traductor_Python;
 import java_cup.runtime.ScannerBuffer;
 import java_cup.runtime.Symbol;
@@ -29,8 +30,6 @@ public class compilerController {
                 parser.parse();
                 parser.ast.graficar();
                 TP.traducir(parser.ast.raiz);
-
-
                 response.setTraduccion(TP.final_traduction);
 
                 String image = Files.readString(new File(".\\src\\main\\resources\\trees\\arbol.svg").toPath());
@@ -53,8 +52,33 @@ public class compilerController {
 
             return response;
         }else if ("go".equals(lenguage)){
-            return null;
-            //return "Esto fue compilado a " + lenguage +  " con exito" + "\n" + code ;
+            Traductor_Go TG = new Traductor_Go();
+
+            try {
+                parser.parse();
+                parser.ast.graficar();
+                TG.traducir(parser.ast.raiz);
+                response.setTraduccion(TG.final_traduction);
+
+                String image = Files.readString(new File(".\\src\\main\\resources\\trees\\arbol.svg").toPath());
+                response.setImage(image);
+
+            } catch (Exception e) {
+
+                Symbol sym = parser.s;
+                LinkedList<String> expected_tokens = parser.getExpectedTokens();
+
+                if(sym != null){
+
+                    String salida = "ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value);
+                    salida += "\n se esperaban los siguientes TOKENS: " + expected_tokens.toString();
+                    response.setError(salida);
+                }
+                System.out.println(e);
+            }
+
+
+            return response;
         }else{
             return null;
             //return "ERROR en el lenguaje de traduccion";

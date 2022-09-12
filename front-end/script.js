@@ -51,8 +51,15 @@ async function go() {
     method: "POST",
     body: text_area1.value,
   });
-  let data = await res.text();
-  text_area2.value = data;
+  let data = await res.json();
+
+  console.log(data);
+
+  text_area2.value = data.traduccion;
+
+  //IMAGEN DE RESPUESTA
+  let blob = new Blob([data.image], { type: "image/svg+xml" });
+  imageUrl = URL.createObjectURL(blob);
 }
 
 async function Python() {

@@ -524,17 +524,23 @@ public class Traductor_Go extends Traductor {
     };
     @Override
     public void traducir_while(Nodo nodo){
-        String aux="while ";
+        String aux="";
+        encolar("for true {");
+        this.tabulacion+=1;
 
         for (Nodo hijo: nodo.getHijos()) {
             if (hijo.getNombre() == "<condicion>") {
-                aux+=traducir_valor(hijo.getValor()) +":";
+                aux+=  "if !(" + traducir_valor(hijo.getValor()) +"){";
                 encolar(aux);
                 this.tabulacion+=1;
+                encolar("break");
+                this.tabulacion-=1;
+                encolar("}");
             } else if (hijo.getNombre() == "instruccion") {
                 traducir(hijo);
             } else if (hijo.getNombre() == "END_WHILE") {
                 this.tabulacion-=1;
+                encolar("}");
             }
         }
     };
@@ -542,20 +548,24 @@ public class Traductor_Go extends Traductor {
     @Override
     public void traducir_do_while(Nodo nodo){
         String aux="";
-        encolar("while True:");
+        encolar("for true {");
         this.tabulacion+=1;
 
         for (Nodo hijo: nodo.getHijos()) {
-            if (hijo.getNombre() == "instruccion") {
-                traducir(hijo);
-            } else if (hijo.getNombre() == "<condicion>") {
-                aux += "if " + traducir_valor(hijo.getValor()) + ":";
+            if (hijo.getNombre() == "<condicion>") {
+                aux+=  "if !(" + traducir_valor(hijo.getValor()) +"){";
                 encolar(aux);
                 this.tabulacion+=1;
                 encolar("break");
-                this.tabulacion-=2;
+                this.tabulacion-=1;
+                encolar("}");
+            } else if (hijo.getNombre() == "instruccion") {
+                traducir(hijo);
             }
         }
+
+        this.tabulacion-=1;
+        encolar("}");
     };
 
     @Override
