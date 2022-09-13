@@ -204,30 +204,57 @@ header {
   width: 100%;
 }
 
-.form {
+.container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
 }
 
-.text_area {
-  display: flex;
-  justify-content: space-evenly;
+.form {
+  width: 93%;
+  align-self: center;
+  /*---------*/
+  display: grid;
+  grid-template-columns: 49% 2% 49%;
+  grid-template-rows: auto;
+  grid-template-areas: "input1 . input2" "error . buttons";
+}
+
+#input1 {
+  grid-area: input1;
+}
+
+#input2 {
+  grid-area: input2;
 }
 
 .text_input {
-  width: 45%;
-  height: 70vh;
+  height: 60vh;
   resize: none;
 }
 
-.button_area {
-  display: flex;
-  justify-content: flex-end;
-  margin-right: 3%;
-  gap: 10px;
-  margin-top: 30px;
+.error_container {
+  grid-area: error;
+}
+.error_container h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+  font-size: 1.5rem;
+  margin: 12px 0px 12px 0px;
+}
+.error_container .error_input {
+  width: 99%;
+  resize: none;
+  height: 12vh;
 }
 
-.button {
-  width: 300px;
-  height: 10vh;
+.button_area {
+  grid-area: buttons;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+.button_area .button {
+  width: 30%;
+  height: 12vh;
 }

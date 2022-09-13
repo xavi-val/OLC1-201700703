@@ -92,8 +92,34 @@ public class UniversalTest {
 
     }
 
+
+    public Boolean searchIlligalToken(Lexer lexer) {
+        while (!lexer.yyatEOF()){
+            try {
+                Symbol aux = lexer.next_token();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if(lexer.illegalCharacter){
+
+            System.out.println("Se encontraron errores lexicos en el archivo, arreglelos antes de poder continuar");
+
+            for (int i = 0; i < lexer.illegalCharacters.size(); i++) {
+                System.out.print("Caracter: " + lexer.illegalCharacters.get(i));
+                System.out.print(" Linea: " + (lexer.illegalCharacterLine.get(i)+1));
+                System.out.println(" Columna: " + (lexer.illegalCharacterColumn.get(i)+1));
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     @Test
-    public void testTraductorPython(){
+    public void testTraductorPython() {
 
         Lexer lexerHandler;
         try {
@@ -102,27 +128,31 @@ public class UniversalTest {
             throw new RuntimeException(e);
         }
 
-        Parser parser = new Parser(lexerHandler);
-        Traductor_Python TP = new Traductor_Python();
+        if(!searchIlligalToken(lexerHandler)){
+            Parser parser = new Parser(lexerHandler);
+            Traductor_Python TP = new Traductor_Python();
 
-        try {
-            parser.parse();
-            parser.ast.graficar();
-            TP.traducir(parser.ast.raiz);
-            TP.generate_file("Traduction_Python.py");
+            try {
+                parser.parse();
+                parser.ast.graficar();
+                TP.traducir(parser.ast.raiz);
+                TP.generate_file("Traduction_Python.py");
 
-        } catch (Exception e) {
+            } catch (Exception e) {
 
-            Symbol sym = parser.s;
-            LinkedList<String> expected_tokens = parser.getExpectedTokens();
+                Symbol sym = parser.s;
+                LinkedList<String> expected_tokens = parser.getExpectedTokens();
 
-            if(sym != null){
-                System.out.println("ERROR EN:  Linea " + (sym.left +1) + " Columna " + (sym.right + 1 ) + ", texto: " + (sym.value) );
-                System.out.println(expected_tokens);
+                if (sym != null) {
+                    System.out.println("ERROR EN:  Linea " + (sym.left + 1) + " Columna " + (sym.right + 1) + ", texto: " + (sym.value));
+                    System.out.print("Izquierda: " + parser.getIzquierda() + " , ");
+                    System.out.print("Derecha: " + parser.getDerecha() + " , ");
+                    System.out.println("Expected tokens: " + expected_tokens);
+                }
+
+                System.out.println(e);
+                throw new RuntimeException(e);
             }
-
-            System.out.println(e);
-            throw new RuntimeException(e);
         }
 
     }

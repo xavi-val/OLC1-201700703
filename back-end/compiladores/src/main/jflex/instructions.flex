@@ -1,7 +1,7 @@
 package com.backend.compiladores.services;
 
 import java_cup.runtime.*;
-import com.backend.compiladores.services.ParserSym;
+import com.backend.compiladores.services.ParserSym;import java.util.LinkedList;
 
 %%
 %public
@@ -110,8 +110,15 @@ imprimir_sin_salto=imprimir_nl
 
 //Variables
 variable = \_{letter}({letter}|{digit})*\_
+lenguaje = {comment}|{numero}|{string}|{Boolean}|{character}|{suma}|{resta}|{multiplicacion}|{division}|{mayor}|{menor}|{mayorIgual}|{menorIgual}|{igual}|{diferente}|peradoreslogicos{or}|{and}|{not}|{asignacion}|{coma}|{scolon}|{Lpar}|{Rpar}|{Lque}|{Rque}|{Lcor}|{Rcor}|{tipado_numero}|{tipado_cadena}|{tipado_boolean}|{tipado_caracter}|{potencia}|{modulo}|{inicio}|{fin}|{ingresar}|{como}|{con_valor}|{if}|{else}|{else_if}|{then}|{end_if}|{select}|{case}|{end_select}|{for}|{to}|{end_for}|{incremental}|{while}|{end_while}|{repetir}|{hasta_que}|{return}|{metodo}|{fin_metodo}|{con_parametros}|{function}|{end_function}|{ejecutar}|{imprimir}|{imprimir_sin_salto}|{variable}|{whitespace}
+
 
 %{
+
+    public Boolean illegalCharacter=false;
+    public LinkedList<String> illegalCharacters= new LinkedList<String>();
+    public LinkedList<Integer> illegalCharacterLine=new LinkedList<Integer>();
+    public LinkedList<Integer> illegalCharacterColumn=new LinkedList<Integer>();
 
     StringBuffer string = new StringBuffer ();
     private Symbol symbol (int type) {
@@ -120,7 +127,6 @@ variable = \_{letter}({letter}|{digit})*\_
     private Symbol symbol (int type, Object value){
         return new Symbol (type, yyline, yycolumn, value) ;
     }
-
 %}
 
 %eofval{
@@ -215,4 +221,9 @@ variable = \_{letter}({letter}|{digit})*\_
 {variable} { return symbol(ParserSym.VARIABLE,yytext()); }
 
 {whitespace} {/*SKIP WHITE SPACE*/}
-[^] { return symbol(ParserSym.ERROR, yytext()); }
+[^] {
+          illegalCharacter=true;
+          illegalCharacters.add(yytext());
+          illegalCharacterLine.add(yyline);
+          illegalCharacterColumn.add(yycolumn);
+      }
