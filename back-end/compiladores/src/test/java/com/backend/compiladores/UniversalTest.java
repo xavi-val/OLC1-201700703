@@ -93,7 +93,15 @@ public class UniversalTest {
     }
 
 
-    public Boolean searchIlligalToken(Lexer lexer) {
+    public Boolean searchIlligalToken() {
+
+        Lexer lexer = null;
+        try {
+            lexer = new Lexer(new BufferedReader(new FileReader(file)));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
         while (!lexer.yyatEOF()){
             try {
                 Symbol aux = lexer.next_token();
@@ -104,7 +112,8 @@ public class UniversalTest {
 
         if(lexer.illegalCharacter){
 
-            System.out.println("Se encontraron errores lexicos en el archivo, arreglelos antes de poder continuar");
+            System.out.println("--------------⚠ Warning--------------");
+            System.out.println("Se encontraron errores lexicos en el archivo, se recomienda corregirlos antes de continuar");
 
             for (int i = 0; i < lexer.illegalCharacters.size(); i++) {
                 System.out.print("Caracter: " + lexer.illegalCharacters.get(i));
@@ -124,36 +133,37 @@ public class UniversalTest {
         Lexer lexerHandler;
         try {
             lexerHandler = new Lexer(new BufferedReader(new FileReader(file)));
+            Boolean respuesta =  searchIlligalToken();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
 
-        if(!searchIlligalToken(lexerHandler)){
-            Parser parser = new Parser(lexerHandler);
-            Traductor_Python TP = new Traductor_Python();
 
-            try {
-                parser.parse();
-                parser.ast.graficar();
-                TP.traducir(parser.ast.raiz);
-                TP.generate_file("Traduction_Python.py");
+        Parser parser = new Parser(lexerHandler);
+        Traductor_Python TP = new Traductor_Python();
 
-            } catch (Exception e) {
+        try {
+            parser.parse();
+            parser.ast.graficar();
+            TP.traducir(parser.ast.raiz);
+            TP.generate_file("Traduction_Python.py");
 
-                Symbol sym = parser.s;
-                LinkedList<String> expected_tokens = parser.getExpectedTokens();
+        } catch (Exception e) {
 
-                if (sym != null) {
-                    System.out.println("ERROR EN:  Linea " + (sym.left + 1) + " Columna " + (sym.right + 1) + ", texto: " + (sym.value));
-                    System.out.print("Izquierda: " + parser.getIzquierda() + " , ");
-                    System.out.print("Derecha: " + parser.getDerecha() + " , ");
-                    System.out.println("Expected tokens: " + expected_tokens);
-                }
+            Symbol sym = parser.s;
+            LinkedList<String> expected_tokens = parser.getExpectedTokens();
 
-                System.out.println(e);
-                throw new RuntimeException(e);
+            if (sym != null) {
+                System.out.println("ERROR EN:  Linea " + (sym.left + 1) + " Columna " + (sym.right + 1) + ", texto: " + (sym.value));
+                System.out.print("Izquierda: " + parser.getIzquierda() + " , ");
+                System.out.print("Derecha: " + parser.getDerecha() + " , ");
+                System.out.println("Expected tokens: " + expected_tokens);
             }
+
+            System.out.println(e);
+            throw new RuntimeException(e);
         }
+
 
     }
 

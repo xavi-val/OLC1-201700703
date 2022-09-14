@@ -3,6 +3,7 @@ const file_selector = document.querySelector("#select_file");
 const save_file = document.querySelector(".save_file");
 const text_area1 = document.querySelector("#input1");
 const text_area2 = document.querySelector("#input2");
+const error_text_area = document.querySelector("#input3");
 const button_go = document.querySelector("#button_go");
 const button_python = document.querySelector("#button_python");
 const flowChartButton = document.querySelector("#flowChartID");
@@ -12,6 +13,7 @@ let selected_file;
 let ip = "192.168.1.11";
 text_area1.value = "inicio \n\nfin";
 text_area2.value = "";
+error_text_area.value="";
 let imageUrl;
 
 button_upload.onclick = function () {
@@ -60,6 +62,9 @@ async function go() {
   //IMAGEN DE RESPUESTA
   let blob = new Blob([data.image], { type: "image/svg+xml" });
   imageUrl = URL.createObjectURL(blob);
+
+  //Errores
+  error_text_area.value = data.error;
 }
 
 async function Python() {
@@ -76,6 +81,9 @@ async function Python() {
   //IMAGEN DE RESPUESTA
   let blob = new Blob([data.image], { type: "image/svg+xml" });
   imageUrl = URL.createObjectURL(blob);
+
+  //Errores
+  error_text_area.value = data.error;
 }
 
 button_python.onclick = () => {

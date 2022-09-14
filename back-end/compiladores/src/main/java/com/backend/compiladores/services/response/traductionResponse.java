@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 public class traductionResponse {
     protected   String traduccion="";
-    protected   String error="";
+    public   String error="";
     protected   String image="";
 
 

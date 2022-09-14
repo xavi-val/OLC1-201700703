@@ -29,6 +29,7 @@ http://hackerdan.com/
 
 ERROR RECOVERY
 CAPITULO 6 de la documentacion de CUP
+https://youtu.be/KbKVxNtiHKw
 
 */
 
@@ -56,6 +57,7 @@ parser code
 //Reescritura de los metodos nativos de CUP para mi conveniencia
     public Symbol s;
     public LinkedList<String> p_list = new LinkedList();
+    public LinkedList<String> error_list = new LinkedList();
     public String izquierdo="", derecho="";
 
     //Asigna el token de error para despues poder sacarlo con el get
@@ -104,6 +106,26 @@ parser code
         derecho = this.symbl_name_from_id(right);
         izquierdo =this.symbl_name_from_id(left);
     }
+
+    public String reportarError(){
+
+        String error = "-----------------------------------------------------------------------------------------------------------\n";
+
+        error += "ERROR EN:  Linea " + (this.s.left + 1) + " Columna " + (this.s.right + 1) + ", texto: " + (this.s.value)+"\n"+
+                        "Izquierda: " + this.getIzquierda() + " , " + "Derecha: " + this.getDerecha() + " , \n" + "Expected tokens: " + this.p_list + "\n";
+
+        error += "-----------------------------------------------------------------------------------------------------------\n";
+
+        error_list.add(error);
+        System.out.println(error);
+
+        return error;
+    }
+
+    public int error_sync_size(){
+        return 2;
+    }
+
 
     //-----------------------------------------------------------
 
@@ -160,8 +182,9 @@ funcion,
 /*EJECUTAR*/
 ejecutar, lista_parametros,
 /*IMPRIMIR*/
-imprimir
+imprimir,
 /*ERRORES*/
+sincronizacion
 
 ;
 terminal
@@ -197,7 +220,10 @@ METODO, FIN_METODO, CON_PARAMETROS,
 FUNCTION, END_FUNCTION,
 /*EJECUTAR*/
 EJECUTAR,
-IMPRIMIR,IMPRIMIR_SIN_SALTO;
+IMPRIMIR,IMPRIMIR_SIN_SALTO,
+/*ERROR*/
+ERROR
+;
 
 /*Precedencia de operadores para expresiones*/
 precedence left SUMA, RESTA;
@@ -211,6 +237,18 @@ precedence left NOT;
 
 start with inicio;
 
+sincronizacion ::=  SEMI_COLON
+                |   COMENTARIO
+                |   END_IF
+//                |   ELSE_IF
+//                |   ELSE
+//                |   LQUE
+                |   END_SELECT
+                |   END_FOR
+                |   END_WHILE
+                |   FIN_METODO
+                |   END_FUNCTION;
+
 inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
         {:
             Nodo tmp = new Nodo("Global","");
@@ -220,8 +258,7 @@ inicio ::= INICIO:e1 lista_instrucciones:e2 FIN:e3
             tmp.addHijo(new Nodo("final", e3.toString(),contador++));
             ast.raiz = tmp;
             RESULT=tmp;
-        :}
-        | INICIO error:e1{: asignarIzquierdoDerecho(e1left,e1right); :} FIN;
+        :};
 
 
 lista_instrucciones ::=  instruccion:e1 lista_instrucciones:e2
@@ -261,7 +298,12 @@ instruccion ::= declaracion:e1
                 Nodo tmp = new Nodo("comentario",e20.toString(),contador++);
                 tmp.setNumNodo(contador++);
                 RESULT=tmp;
-            :};
+            :}
+            | error:e1 sincronizacion
+           {:
+               asignarIzquierdoDerecho(e1left,e1right);
+               reportarError();
+           :};
 
 
 /*Valores*/

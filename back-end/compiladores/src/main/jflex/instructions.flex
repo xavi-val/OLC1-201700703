@@ -226,4 +226,5 @@ lenguaje = {comment}|{numero}|{string}|{Boolean}|{character}|{suma}|{resta}|{mul
           illegalCharacters.add(yytext());
           illegalCharacterLine.add(yyline);
           illegalCharacterColumn.add(yycolumn);
+          return symbol(ParserSym.ERROR, yytext());
       }
