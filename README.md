@@ -18,11 +18,11 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 	5.1 Dentro de *script.js* existe una variable que indica la direccion ip del backend, cambiarla a la direccion ip de su PC de lo contrario no funcionaran las peticiones al backend.
 6. Listo para usarse.
 
-##Esctructura del proyecto
-###Backend
+## Esctructura del proyecto
+### Backend
 
 
-- ####cup
+- #### cup
 
 	En esta carpeta encontraras dos archivos, *parser.cup* y *golang_helper.cup*
 
@@ -30,12 +30,12 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 
 	**golang_helper.cup:** Archivo encargado de generar un parser llamado *golang_helper* el cual ayuda al traductor de golang a reacomodar la sintaxis al momento de la traduccion. Este nuevo parser es utilizado en la clase *Traductor_Go* mas adelante.
 
-- ####com.backend.compiladores
+- #### com.backend.compiladores
 
 	**mainController:** Encargado de recibir las peticiones POST del front para iniciar la traduccion a traves del *compilerController*
 
 	**CompiladoresApplication:** Clase principal para correr Spring boot
 
-- ####services
+- #### services
 	**compilerController:** Encargado de crear el lexer, parser, y la 
 
