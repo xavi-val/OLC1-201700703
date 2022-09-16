@@ -21,7 +21,7 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 ## Esctructura del proyecto
 ### Backend
 
-## src/main/
+### src/main/
 
 - #### /cup
 
