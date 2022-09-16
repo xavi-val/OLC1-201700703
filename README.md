@@ -8,7 +8,7 @@ Pseudo-Parser es un lenguaje de programacion para las personas que no conocen lo
 
 ## Como usar y configurar la app.
 
-El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Spring Boot en Java. El proyecto usar JFlex como analizador lexico y CUP como analisador sintactico.
+El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Spring Boot en Java. El proyecto usa JFlex como analizador lexico y CUP como analisador sintactico.
 
 1. Descargar el repositorio.
 2. Abrir el proyecto con IDE preferido (Se recomienda usar IntelliJ IDEA)
@@ -21,8 +21,9 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 ## Esctructura del proyecto
 ### Backend
 
+## src/main/
 
-- #### cup
+- #### /cup
 
 	En esta carpeta encontraras dos archivos, *parser.cup* y *golang_helper.cup*
 
@@ -30,12 +31,29 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 
 	**golang_helper.cup:** Archivo encargado de generar un parser llamado *golang_helper* el cual ayuda al traductor de golang a reacomodar la sintaxis al momento de la traduccion. Este nuevo parser es utilizado en la clase *Traductor_Go* mas adelante.
 
-- #### com.backend.compiladores
+- #### java/com/backend/compiladores
 
 	**mainController:** Encargado de recibir las peticiones POST del front para iniciar la traduccion a traves del *compilerController*
 
 	**CompiladoresApplication:** Clase principal para correr Spring boot
 
-- #### services
-	**compilerController:** Encargado de crear el lexer, parser, y la 
+- #### /services
+	**compilerController:** Encargado de crear el lexer, parser, el AST (Abstract Sintax Tree), traducir el codigo y determinar los errores lexicos o sintacticos que puedan surgir, anexando toda la informacion generada al objeto response, el arbol generado se guarda en la carpeta resources.
+
+	- #### /parserPackage
+		Clases para la creacion de arboles y nodos
+	- #### /response
+		Clase de respuesta del backend donde van la respuesta de traduccion en conjunto con el arbol y los errores.
+	- #### /traductor
+		Traductores del arbol al lenguaje objetivo
+
+- #### /jflex
+	Definicion de los tokens para el analisis lexico y posterior uso en el analisis sintactico
+
+- #### /target/generated-sources
+	- #### /cup
+		Parser generado a partir del archivo CUP
+	- #### /jflex
+		Lexer generado para el analisis lexico y devolucion del codigo en forma de tokens
+
 
