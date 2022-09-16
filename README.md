@@ -11,12 +11,13 @@ Pseudo-Parser es un lenguaje de programacion para las personas que no conocen lo
 El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Spring Boot en Java. El proyecto usa JFlex como analizador lexico y CUP como analisador sintactico.
 
 1. Descargar el repositorio.
-2. Abrir el proyecto con IDE preferido (Se recomienda usar IntelliJ IDEA)
-3. Descargar las dependencias del projecto en [Maven](https://youtu.be/91DamlXb7bE)
-4. Correr la aplicacion *CompiladoresApplication* la cual correra el backend en el puerto 8080
-5. Abrir el *index.html* para observar la interfaz.
+2. Tener instalado Java 17.0.2 o superior
+3. Abrir el proyecto con IDE preferido (Se recomienda usar IntelliJ IDEA)
+4. Descargar las dependencias del projecto en [Maven](https://youtu.be/91DamlXb7bE)
+5. Correr la aplicacion *CompiladoresApplication* la cual correra el backend en el puerto 8080
+6. Abrir el *index.html* para observar la interfaz.
 	5.1 Dentro de *script.js* existe una variable que indica la direccion ip del backend, cambiarla a la direccion ip de su PC de lo contrario no funcionaran las peticiones al backend.
-6. Listo para usarse.
+7. Listo para usarse.
 
 ## Esctructura del proyecto
 ### Backend
