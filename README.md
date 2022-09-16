@@ -15,8 +15,7 @@ El proyecto consta de frontend escrito en HTML SCSS y JS y una REST/API en Sprin
 3. Abrir el proyecto con IDE preferido (Se recomienda usar IntelliJ IDEA)
 4. Descargar las dependencias del projecto en [Maven](https://youtu.be/91DamlXb7bE)
 5. Correr la aplicacion *CompiladoresApplication* la cual correra el backend en el puerto 8080
-6. Abrir el *index.html* para observar la interfaz.
-	6_1. Dentro de *script.js* existe una variable que indica la direccion ip del backend, cambiarla a la direccion ip de su PC de lo contrario no funcionaran las peticiones al backend.
+6. Abrir el *index.html* para observar la interfaz. Dentro de *script.js* existe una variable que indica la direccion ip del backend, cambiarla a la direccion ip de su PC de lo contrario no funcionaran las peticiones al backend.
 7. Listo para usarse.
 
 ## Esctructura del proyecto
