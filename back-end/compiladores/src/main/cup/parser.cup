@@ -240,9 +240,6 @@ start with inicio;
 sincronizacion ::=  SEMI_COLON
                 |   COMENTARIO
                 |   END_IF
-//                |   ELSE_IF
-//                |   ELSE
-//                |   LQUE
                 |   END_SELECT
                 |   END_FOR
                 |   END_WHILE
@@ -311,7 +308,6 @@ valor ::= CADENA:e1 {: RESULT =  ats(new Object[] {e1}) ; :}
         | condicion:e2 {: RESULT = ats(new Object[] {e2}) ; :} /*condicion esta declarado mas abajo 👇 */
         | CARACTER:e3 {: RESULT = ats(new Object[] {e3}) ; :}
         | expr:e4 {: RESULT = ats(new Object[] {e4}) ; :};
-        /*| LPAREN:e1 valor:e2 RPAREN:e3 {: RESULT = ats(new Object[] {e1,e2,e3}) ; :};*/
 
 /*Expresiones*/
 expr ::= expr:e1 SUMA:e2 expr:e3 {:RESULT = ats(new Object[] {e1,e2,e3}) ;:}
