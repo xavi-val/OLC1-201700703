@@ -11,9 +11,9 @@ import com.backend.compiladores.services.compilerController;
 public class mainController {
 
 
-    @GetMapping("")
+    @RequestMapping(value = "",produces = "application/json")
     public String saludar(){
-        return "Hola mundo 😁";
+        return "Hola mundo 😁 estoy en azure";
     }
 
     @RequestMapping(value = "/go",produces = "application/json")
