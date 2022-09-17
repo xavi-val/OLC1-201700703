@@ -58,14 +58,14 @@ not=not
 
 //Sibolos de un solo caracter - Inicio
 asignacion =->
-coma =\,
-scolon =\;
-Lpar =\(
-Rpar =\)
-Lcor =\[
-Rcor =\]
-Lque =\¿
-Rque =\?
+coma =","
+scolon =";"
+Lpar ="("
+Rpar =")"
+Lcor ="["
+Rcor ="]"
+Lque ="¿"
+Rque ="?"
 
 //Palabras reservadas - TIPADO
 tipado_numero = numero|número
