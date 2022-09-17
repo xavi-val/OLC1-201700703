@@ -1,6 +1,8 @@
 # Pseudo-Parser to Python and Golang
 Proyecto 1 del curso de Organizacion de Lenguajes y Compiladores 1 de la Universidad de San Carlos de Guatemala.
 
+Proyecto web: https://salmon-rock-01504280f.1.azurestaticapps.net/
+
 #### Descripcion
 
 Pseudo-Parser es un lenguaje de programacion para las personas que no conocen los lenguajes Python y Golang pueda aplicar sus conocimientos en pseudocódigo y utilizando la aplicación, traducir este código a Python o Golang respectivamente.
