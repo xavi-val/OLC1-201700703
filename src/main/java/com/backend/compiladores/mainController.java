@@ -14,14 +14,14 @@ public class mainController {
     @GetMapping("")
     public String saludar(){
         return "Hola mundo 😁";
-    }    
+    }
 
-    @PostMapping("/go")
+    @RequestMapping(value = "/go",produces = "application/json", method=RequestMethod.PUT)
     public traductionResponse post_compile_go(@RequestBody String code){
         return compilerController.compile(code, "go");
     };
 
-    @PostMapping("/python")
+    @RequestMapping(value = "/python",produces = "application/json", method=RequestMethod.PUT)
     public traductionResponse post_compile_python(@RequestBody String code){
         return compilerController.compile(code, "python");
     };
