@@ -16,12 +16,12 @@ public class mainController {
         return "Hola mundo 😁";
     }
 
-    @RequestMapping(value = "/go",produces = "application/json", method=RequestMethod.PUT)
+    @RequestMapping(value = "/go",produces = "application/json")
     public traductionResponse post_compile_go(@RequestBody String code){
         return compilerController.compile(code, "go");
     };
 
-    @RequestMapping(value = "/python",produces = "application/json", method=RequestMethod.PUT)
+    @RequestMapping(value = "/python",produces = "application/json")
     public traductionResponse post_compile_python(@RequestBody String code){
         return compilerController.compile(code, "python");
     };
