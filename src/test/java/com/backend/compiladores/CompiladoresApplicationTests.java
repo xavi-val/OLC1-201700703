@@ -7,11 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class CompiladoresApplicationTests {
 
-	@Test
-	void contextLoads() {
-
-	}
-
 
 
 }
