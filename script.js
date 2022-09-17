@@ -69,7 +69,7 @@ text_area1.addEventListener("mouseup", filaColumna);
 /*AJAX METHODS*/
 
 async function go() {
-  let res = await fetch(`go`, {
+  let res = await fetch(`${ip}go`, {
     method: "POST",
     body: text_area1.value,
   });
@@ -88,7 +88,7 @@ async function go() {
 }
 
 async function Python() {
-  let res = await fetch(`python`, {
+  let res = await fetch(`${ip}python`, {
     method: "POST",
     body: text_area1.value,
   });
