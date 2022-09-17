@@ -1,8 +1,0 @@
-
-#Comentario antes del inicio
-#Archivo de prueba, comentario de una linea
-'''
-	Comentarios de varias lineas
-	Javier Andres Valdez Gonzalez - 201700703
-'''
-if __name__ == '__main__':	
