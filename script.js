@@ -11,10 +11,10 @@ const filaColumnaLabel = document.querySelector("#filaColumna");
 
 /*MENU METHODS*/
 let selected_file;
-let ip = "192.168.1.11";
+let ip = "https://pseudo-code-to-python-and-golang.azurewebsites.net/";
 text_area1.value = "inicio \n\nfin";
 text_area2.value = "";
-error_text_area.value="";
+error_text_area.value = "";
 let imageUrl;
 
 /* Subir un documento y cargarlo al text area */
@@ -50,25 +50,26 @@ flowChartButton.onclick = function () {
   window.open(imageUrl, "Flow Chart");
 };
 
-
 /* OBTENER FILA Y COLUMNA EN DONDE ESTA EL CURSOR */
 
-function filaColumna(){
-  let textLines = text_area1.value.substr(0, text_area1.selectionStart).split("\n");
+function filaColumna() {
+  let textLines = text_area1.value
+    .substr(0, text_area1.selectionStart)
+    .split("\n");
   let currentLineNumber = textLines.length;
-  let currentColumnIndex = textLines[textLines.length-1].length+1;
-  filaColumnaLabel.innerHTML = "Fila: "+ currentLineNumber+" Columna: " + currentColumnIndex ;  
+  let currentColumnIndex = textLines[textLines.length - 1].length + 1;
+  filaColumnaLabel.innerHTML =
+    "Fila: " + currentLineNumber + " Columna: " + currentColumnIndex;
 }
 
-text_area1.addEventListener("keyup",filaColumna);
-text_area1.addEventListener("keydown",filaColumna);
-text_area1.addEventListener("mouseup",filaColumna);
-
+text_area1.addEventListener("keyup", filaColumna);
+text_area1.addEventListener("keydown", filaColumna);
+text_area1.addEventListener("mouseup", filaColumna);
 
 /*AJAX METHODS*/
 
 async function go() {
-  let res = await fetch(`http://${ip}:8080/go`, {
+  let res = await fetch(`go`, {
     method: "POST",
     body: text_area1.value,
   });
@@ -87,7 +88,7 @@ async function go() {
 }
 
 async function Python() {
-  let res = await fetch(`http://${ip}:8080/python`, {
+  let res = await fetch(`python`, {
     method: "POST",
     body: text_area1.value,
   });
