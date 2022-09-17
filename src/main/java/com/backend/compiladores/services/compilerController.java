@@ -4,7 +4,6 @@ package com.backend.compiladores.services;
 import com.backend.compiladores.services.response.traductionResponse;
 import com.backend.compiladores.services.traductor.Traductor_Go;
 import com.backend.compiladores.services.traductor.Traductor_Python;
-import java_cup.runtime.ScannerBuffer;
 import java_cup.runtime.Symbol;
 
 import java.io.*;
