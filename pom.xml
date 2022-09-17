@@ -8,8 +8,8 @@
 		<version>2.7.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.xavi-val</groupId>
-	<artifactId>pseudo-code-to-python-and-golang</artifactId>
+	<groupId>com.backend</groupId>
+	<artifactId>compiladores</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>compiladores</name>
 	<description>Backend para el curso de Compiladores 1, proyecto 1</description>
