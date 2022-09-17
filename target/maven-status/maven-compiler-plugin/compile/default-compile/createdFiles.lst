@@ -1,5 +1,0 @@
-com\backend\compiladores\services\ParserSym.class
-com\backend\compiladores\services\Lexer.class
-com\backend\compiladores\services\Parser.class
-com\backend\compiladores\services\helper\golang_helper_lexer.class
-com\backend\compiladores\services\Parser$CUP$Parser$actions.class
