@@ -64,7 +64,7 @@ Lpar ="("
 Rpar =")"
 Lcor ="["
 Rcor ="]"
-Lque ="¿"
+Lque =\¿
 Rque ="?"
 
 //Palabras reservadas - TIPADO
