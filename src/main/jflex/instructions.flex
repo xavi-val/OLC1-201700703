@@ -64,8 +64,8 @@ Lpar ="("
 Rpar =")"
 Lcor ="["
 Rcor ="]"
-Lque =\¿
-Rque ="?"
+Lque = "\¿"
+Rque = "?"
 
 //Palabras reservadas - TIPADO
 tipado_numero = numero|número
